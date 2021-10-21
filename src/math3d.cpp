@@ -68,7 +68,7 @@ mat4 mat4::look_at(const vec3& pos, const vec3& at, const vec3& up) {
 }
 mat4 mat4::perspective(float angle, float aspect, float zn, float zf) {
 	auto d = zn - zf;
-	auto ys = 1.f / tan(angle / 2.f);
+	auto ys = -1.f / tan(angle / 2.f);
 	auto xs = ys / aspect;
 	auto zs = zf / d;
 	auto zb = zn * zf / d;
