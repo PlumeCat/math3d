@@ -113,7 +113,9 @@ struct mat4 {
 	static mat4 rotate_x(float x);
 	static mat4 rotate_y(float y);
 	static mat4 rotate_z(float z);
+	// Right handed look-at (for camera view matrix)
 	static mat4 look_at(const vec3& pos, const vec3& at, const vec3& up);
+	// Right handed perspective projection with clip space [ 0, 1 ]
 	static mat4 perspective(float angle, float aspect, float zn, float zf);
 	static mat4 ortho(float w, float h, float zn, float zf);
 	static mat4 world(const vec3& fd, const vec3& up, const vec3& pos);

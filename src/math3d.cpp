@@ -67,11 +67,11 @@ mat4 mat4::look_at(const vec3& pos, const vec3& at, const vec3& up) {
 	} };
 }
 mat4 mat4::perspective(float angle, float aspect, float zn, float zf) {
-	auto d = zf - zn;
+	auto d = zn - zf;
 	auto ys = 1.f / tan(angle / 2.f);
 	auto xs = ys / aspect;
-	auto zs = -(zf + zn) / d;
-	auto zb = -2 * zf * zn / d;
+	auto zs = zf / d;
+	auto zb = zn * zf / d;
 
 	return mat4 { {
 		xs, 0, 0, 0,
@@ -79,6 +79,18 @@ mat4 mat4::perspective(float angle, float aspect, float zn, float zf) {
 		0, 0, zs, -1,
 		0, 0, zb, 0
 	} };
+	/*
+	* Adapted from GLM source
+	
+	h = cos(0.5 * rad) / sin(0.5 * rad)
+	w = h / aspect;
+
+	[0][0] = w
+	[1][1] = h
+	[2][2] = zf / (zn - zf)
+	[2][3] = -1
+	[3][2] = (zf * zn) / (zn - zf);
+	*/
 }
 
 mat4 mat4::world(const vec3& fd, const vec3& up, const vec3& pos) {
