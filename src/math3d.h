@@ -12,9 +12,12 @@
 const float pi = 3.1415926535f;
 
 struct vec2 {
-	float x = 0, y = 0;
+	union {
+		struct { float x, y; };
+		float v[2];
+	};
 
-	vec2() = default;
+	vec2() { x = 0; y = 0; }
 	vec2(float x, float y): x(x), y(y) {}
 	vec2(const vec2&) = default;
 	vec2(vec2&&) = default;
@@ -41,9 +44,12 @@ struct vec2 {
 };
 
 struct vec3 {
-	float x = 0, y = 0, z = 0;
+	union {
+		struct { float x, y, z; };
+		float v[3];
+	};
 
-	vec3() = default;
+	vec3() { x = 0; y = 0; z = 0; }
 	vec3(float x, float y, float z): x(x), y(y), z(z) {}
 	vec3(const vec3&) = default;
 	vec3(vec3&&) = default;
@@ -71,9 +77,12 @@ struct vec3 {
 };
 
 struct vec4 {
-	float x = 0, y = 0, z = 0, w = 0;
+	union {
+		struct { float x, y, z, w; };
+		float v[4];
+	};
 
-	vec4() = default;
+	vec4() { x = 0; y = 0; z = 0; w = 0; }
 	vec4(float x, float y, float z, float w): x(x), y(y), z(z), w(w) {}
 	vec4(const vec4&) = default;
 	vec4(vec4&&) = default;

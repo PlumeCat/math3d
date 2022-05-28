@@ -38,9 +38,9 @@ mat4 mat4::rotate_y(float y) {
 	float c = cos(y);
 	float s = sin(y);
 	return mat4 { {
-		c, 0, s, 0,
+		c, 0, -s, 0,
 		0, 1, 0,  0,
-		-s, 0, c,  0,
+		s, 0, c,  0,
 		0, 0, 0,  1
 	} };
 }
@@ -55,21 +55,21 @@ mat4 mat4::rotate_z(float z) {
 	};
 }
 mat4 mat4::look_at(const vec3& pos, const vec3& at, const vec3& up) {
-	auto az = normalize(pos - at);
-	auto ax = normalize(cross(up, az));
-	auto ay = cross(az, ax);
+	auto az = normalize(at - pos);
+	auto ax = normalize(cross(az, up));
+	auto ay = cross(ax, az);
 
 	return mat4 { {
-		ax.x,		   ay.x,		  az.x,		     0,
-		ax.y,		   ay.y,		  az.y,		     0,
-		ax.z,		   ay.z,		  az.z,		     0,
-		-dot(ax, pos), -dot(ay, pos), -dot(az, pos), 1
+		ax.x,		   ay.x,		  -az.x,	     0,
+		ax.y,		   ay.y,		  -az.y,	     0,
+		ax.z,		   ay.z,		  -az.z,	     0,
+		-dot(ax, pos), -dot(ay, pos), dot(az, pos),  1
 	} };
 }
 mat4 mat4::perspective(float angle, float aspect, float zn, float zf) {
-	auto d = zn - zf;
 	auto ys = -1.f / tan(angle / 2.f);
 	auto xs = ys / aspect;
+	auto d = zn - zf;
 	auto zs = zf / d;
 	auto zb = zn * zf / d;
 
@@ -90,6 +90,47 @@ mat4 mat4::perspective(float angle, float aspect, float zn, float zf) {
 	[2][2] = zf / (zn - zf)
 	[2][3] = -1
 	[3][2] = (zf * zn) / (zn - zf);
+	*/
+
+	/*
+	* 	template<typename T> GLM_FUNC_QUALIFIER mat<4, 4, T, defaultp> perspectiveFovRH_ZO(T fov, T width, T height, T zNear, T zFar)
+	{
+		T const rad = fov;
+		T const h = glm::cos(static_cast<T>(0.5) * rad) / glm::sin(static_cast<T>(0.5) * rad);
+		T const w = h * height / width; ///todo max(width , Height) / min(width , Height)?
+
+		mat<4, 4, T, defaultp> Result(static_cast<T>(0));
+		Result[0][0] = w;
+		Result[1][1] = h;
+		Result[2][2] = zFar / (zNear - zFar);
+		Result[2][3] = - static_cast<T>(1);
+		Result[3][2] = -(zFar * zNear) / (zFar - zNear);
+		return Result;
+	}
+	*/
+}
+mat4 mat4::ortho(float w, float h, float zn, float zf) {
+	auto zd = zn - zf;
+	return mat4 { {
+			2 / (w), 0, 0, 0,
+			0, 2 / h, 0, 0,
+			0, 0, 1 / zd, 0,
+			0, 0, zn / zd, 1
+	} };
+	/*
+	Adapted from GLM source
+		template<typename T>
+		GLM_FUNC_QUALIFIER mat<4, 4, T, defaultp> orthoRH_ZO(T left, T right, T bottom, T top, T zNear, T zFar)
+		{
+			mat<4, 4, T, defaultp> Result(1);
+			Result[0][0] = static_cast<T>(2) / (right - left);
+			Result[1][1] = static_cast<T>(2) / (top - bottom);
+			Result[2][2] = - static_cast<T>(1) / (zFar - zNear);
+			Result[3][0] = - (right + left) / (right - left);
+			Result[3][1] = - (top + bottom) / (top - bottom);
+			Result[3][2] = - zNear / (zFar - zNear);
+			return Result;
+		}
 	*/
 }
 
