@@ -5,8 +5,13 @@ cmake_minimum_required (VERSION 3.8)
 
 project ("math3d")
 
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
+
 # Add source to this project's executable.
-add_library (math3d "src/math3d.cpp" "src/math3d.h")
+add_library(math3d "src/math3d.cpp" "src/math3d.h")
+add_executable(math3d_test "src/math3d_test.cpp")
+target_link_libraries(math3d_test math3d)
 
 message("Cmake Build Type: ${CMAKE_BUILD_TYPE}")
 

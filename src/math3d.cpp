@@ -1,8 +1,5 @@
 #include "math3d.h"
 #include <cmath>
-#include <cstring>
-
-
 
 mat4 mat4::identity() {
 	return mat4 {};
@@ -65,9 +62,32 @@ mat4 mat4::look_at(const vec3& pos, const vec3& at, const vec3& up) {
 		ax.z,		   ay.z,		  -az.z,	     0,
 		-dot(ax, pos), -dot(ay, pos), dot(az, pos),  1
 	} };
+
+
+	//template<typename T, qualifier Q>
+	//GLM_FUNC_QUALIFIER mat<4, 4, T, Q> lookAtRH(vec<3, T, Q> const& eye, vec<3, T, Q> const& center, vec<3, T, Q> const& up) {
+	//	vec<3, T, Q> const f(normalize(center - eye));
+	//	vec<3, T, Q> const s(normalize(cross(f, up)));
+	//	vec<3, T, Q> const u(cross(s, f));
+
+	//	mat<4, 4, T, Q> Result(1);
+	//	Result[0][0] = s.x;
+	//	Result[1][0] = s.y;
+	//	Result[2][0] = s.z;
+	//	Result[0][1] = u.x;
+	//	Result[1][1] = u.y;
+	//	Result[2][1] = u.z;
+	//	Result[0][2] = -f.x;
+	//	Result[1][2] = -f.y;
+	//	Result[2][2] = -f.z;
+	//	Result[3][0] = -dot(s, eye);
+	//	Result[3][1] = -dot(u, eye);
+	//	Result[3][2] = dot(f, eye);
+	//	return Result;
+	//}
 }
 mat4 mat4::perspective(float angle, float aspect, float zn, float zf) {
-	auto ys = -1.f / tan(angle / 2.f);
+	auto ys = 1.f / tan(angle / 2.f);
 	auto xs = ys / aspect;
 	auto d = zn - zf;
 	auto zs = zf / d;
@@ -75,26 +95,14 @@ mat4 mat4::perspective(float angle, float aspect, float zn, float zf) {
 
 	return mat4 { {
 		xs, 0, 0, 0,
-		0, ys, 0, 0,
-		0, 0, zs, -1,
-		0, 0, zb, 0
+		0, -ys, 0, 0,
+		0, 0, zs, zb,
+		0, 0, -1, 0
 	} };
 	/*
 	* Adapted from GLM source
 	
-	h = cos(0.5 * rad) / sin(0.5 * rad)
-	w = h / aspect;
-
-	[0][0] = w
-	[1][1] = h
-	[2][2] = zf / (zn - zf)
-	[2][3] = -1
-	[3][2] = (zf * zn) / (zn - zf);
-	*/
-
-	/*
-	* 	template<typename T> GLM_FUNC_QUALIFIER mat<4, 4, T, defaultp> perspectiveFovRH_ZO(T fov, T width, T height, T zNear, T zFar)
-	{
+	mat4 perspectiveFovRH_ZO(float fov, float width, float height, float zNear, float zFar) {
 		T const rad = fov;
 		T const h = glm::cos(static_cast<T>(0.5) * rad) / glm::sin(static_cast<T>(0.5) * rad);
 		T const w = h * height / width; ///todo max(width , Height) / min(width , Height)?
@@ -106,6 +114,24 @@ mat4 mat4::perspective(float angle, float aspect, float zn, float zf) {
 		Result[2][3] = - static_cast<T>(1);
 		Result[3][2] = -(zFar * zNear) / (zFar - zNear);
 		return Result;
+	}
+
+	// rewritten:
+	{
+		float rad = fov;
+		float y = cos(0.5 * rad) / sin(0.5 * rad)
+				= 1 / tan(0.5 * rad)
+
+		float x = y / aspect
+		float z = zfar / (znear - zfar)
+		float w = -(zfar * znear) / (zfar - znear)
+
+		return {
+			x, 0, 0, 0,
+			0, y, 0, 0,
+			0, 0, z, w,
+			0, 0, -1, 0
+		}
 	}
 	*/
 }
@@ -216,4 +242,11 @@ vec3 lerp(const vec3& x, const vec3& y, const float t) {
 }
 vec4 lerp(const vec4& x, const vec4& y, const float t) {
 	return x + (y - x) * t;
+}
+
+
+float determinant(const mat4& m) {
+	return 0;
+	// const float d4 = 
+	// return m.m[0] * d1 + m.m[1] * d2 + m.m[2] * d3 + m.m[3] * d4;
 }
