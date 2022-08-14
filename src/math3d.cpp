@@ -65,7 +65,6 @@ mat4 mat4::look_at(const vec3& pos, const vec3& at, const vec3& up) {
 
 
 	//template<typename T, qualifier Q>
-	//GLM_FUNC_QUALIFIER mat<4, 4, T, Q> lookAtRH(vec<3, T, Q> const& eye, vec<3, T, Q> const& center, vec<3, T, Q> const& up) {
 	//	vec<3, T, Q> const f(normalize(center - eye));
 	//	vec<3, T, Q> const s(normalize(cross(f, up)));
 	//	vec<3, T, Q> const u(cross(s, f));
@@ -87,53 +86,17 @@ mat4 mat4::look_at(const vec3& pos, const vec3& at, const vec3& up) {
 	//}
 }
 mat4 mat4::perspective(float angle, float aspect, float zn, float zf) {
-	auto ys = 1.f / tan(angle / 2.f);
+	auto ys = 1.0f / tan(angle / 2.0f);
 	auto xs = ys / aspect;
-	auto d = zn - zf;
-	auto zs = zf / d;
-	auto zb = zn * zf / d;
+	auto zs = zf / (zn - zf);
+	auto zb = zn * zs;
 
-	return mat4 { {
+	return mat4 {{
 		xs, 0, 0, 0,
 		0, -ys, 0, 0,
-		0, 0, zs, zb,
-		0, 0, -1, 0
-	} };
-	/*
-	* Adapted from GLM source
-	
-	mat4 perspectiveFovRH_ZO(float fov, float width, float height, float zNear, float zFar) {
-		T const rad = fov;
-		T const h = glm::cos(static_cast<T>(0.5) * rad) / glm::sin(static_cast<T>(0.5) * rad);
-		T const w = h * height / width; ///todo max(width , Height) / min(width , Height)?
-
-		mat<4, 4, T, defaultp> Result(static_cast<T>(0));
-		Result[0][0] = w;
-		Result[1][1] = h;
-		Result[2][2] = zFar / (zNear - zFar);
-		Result[2][3] = - static_cast<T>(1);
-		Result[3][2] = -(zFar * zNear) / (zFar - zNear);
-		return Result;
-	}
-
-	// rewritten:
-	{
-		float rad = fov;
-		float y = cos(0.5 * rad) / sin(0.5 * rad)
-				= 1 / tan(0.5 * rad)
-
-		float x = y / aspect
-		float z = zfar / (znear - zfar)
-		float w = -(zfar * znear) / (zfar - znear)
-
-		return {
-			x, 0, 0, 0,
-			0, y, 0, 0,
-			0, 0, z, w,
-			0, 0, -1, 0
-		}
-	}
-	*/
+		0, 0, zs, -1,
+		0, 0, zb, 0
+	}};
 }
 mat4 mat4::ortho(float w, float h, float zn, float zf) {
 	auto zd = zn - zf;
