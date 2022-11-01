@@ -13,5 +13,6 @@ using namespace std;
 int main(int argc, char* argv[]) {
     test("vec2 add", vec2(1, 2) + vec2(3, 4), vec2(4, 6));
     test("vec2 sub", vec2(3, 4) - vec2(1, 2), vec2(2, 2));
+    // TODO: more tests!
 }
 
