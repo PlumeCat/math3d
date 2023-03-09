@@ -8,7 +8,7 @@
             "type": "lldb",
             "request": "launch",
             "name": "Debug",
-            "program": "${workspaceFolder}/out/build/wsl/x64-Debug/math3d_test",
+            "program": "${workspaceFolder}/build/Debug/math3d_test",
             "args": [],
             "cwd": "${workspaceFolder}",
             "preLaunchTask": "make debug"
