@@ -7,7 +7,7 @@
             "label": "make debug",
             "type": "shell",
             "options": {
-                "cwd": "${workspaceFolder}/out/build/wsl/x64-Debug"
+                "cwd": "${workspaceFolder}/build/Debug"
             },
             "group": {
                 "kind": "build",
@@ -19,12 +19,12 @@
             "label": "cmake debug",
             "type": "shell",
             "options": {
-                "cwd": "${workspaceFolder}/out/build/wsl/x64-Debug",
+                "cwd": "${workspaceFolder}/build/Debug",
                 "env": {
                     "CMAKE_BUILD_TYPE": "Debug"
                 }
             },
-            "command": "cmake ../../../../ -G 'Unix Makefiles'",
+            "command": "cmake ../../ -G 'Unix Makefiles'",
             "problemMatcher": []
         }
     ]
