@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cmath>
+#include <iostream>
 // #ifndef JMATH_ENABLE_SSE2
 // #define JMATH_ENABLE_SSE2
 // #endif
@@ -138,6 +139,34 @@ struct mat4 {
     static mat4 world(const vec3& fd, const vec3& up, const vec3& pos);
 
     mat4 operator * (const mat4& _);
+    mat4 operator * (float f) {
+        return mat4 {
+            m[0]/f, m[1]/f, m[2]/f, m[3]/f,
+            m[4]/f, m[5]/f, m[6]/f, m[7]/f,
+            m[8]/f, m[9]/f, m[10]/f, m[11]/f,
+            m[12]/f, m[13]/f, m[14]/f, m[15]/f,
+        };
+    }
+
+    mat4() {}
+    mat4(
+        float _0, float _1,  float _2,  float _3,
+        float _4,  float _5,  float _6,  float _7,
+        float _8,  float _9,  float _10, float _11,
+        float _12, float _13, float _14, float _15
+    ): m {
+        _0, _1, _2, _3,
+        _4, _5, _6, _7,
+        _8, _9, _10,_11,
+        _12,_13,_14,_15
+    } {}
+    mat4(const vec4& r0, const vec4& r1, const vec4& r2, const vec4& r3
+    ): m {
+        r0.x, r0.y, r0.z, r0.w,
+        r1.x, r1.y, r1.z, r1.w,
+        r2.x, r2.y, r2.z, r2.w,
+        r3.x, r3.y, r3.z, r3.w,
+    } {}
 };
 
 struct perlin_noise_1d {};
@@ -171,6 +200,10 @@ float length(const vec2& v);
 float length(const vec3& v);
 float length(const vec4& v);
 
+float length_sq(const vec2& v);
+float length_sq(const vec3& v);
+float length_sq(const vec4& v);
+
 float distance(const vec2& a, const vec2& b);
 float distance(const vec3& a, const vec3& b);
 float distance(const vec4& a, const vec4& b);
@@ -182,6 +215,7 @@ vec4 lerp(const vec4& x, const vec4& y, const float t);
 vec2 mul(const vec2& v, const mat4& m);
 vec3 mul(const vec3& v, const mat4& m);
 vec4 mul(const vec4& v, const mat4& m);
+vec2 mul_norm(const vec2& v, const mat4& m);
 vec3 mul_norm(const vec3& v, const mat4& m);
 
 mat4 transpose(const mat4& m);
@@ -195,15 +229,25 @@ float saturate(float x);
 #define per_component_2(f) vec2 f(const vec2& v) { return { f(v.x), f(v.y) }; }
 #define per_component_3(f) vec3 f(const vec3& v) { return { f(v.x), f(v.y), f(v.z) }; }
 #define per_component_4(f) vec4 f(const vec4& v) { return { f(v.x), f(v.y), f(v.z), f(v.w) }; }
+#define per_component_2_2(f) vec2 f(const vec2& v, float s) { return { f(v.x, s), f(v.y, s) }; }
+#define per_component_2_3(f) vec3 f(const vec3& v, float s) { return { f(v.x, s), f(v.y, s), f(v.z, s) }; }
+#define per_component_2_4(f) vec4 f(const vec4& v, float s) { return { f(v.x, s), f(v.y, s), f(v.z, s), f(v.w, s) }; }
 #else
 #define per_component_2(f) vec2 f(const vec2& v);
 #define per_component_3(f) vec3 f(const vec3& v);
 #define per_component_4(f) vec4 f(const vec4& v);
+#define per_component_2_2(f) vec2 f(const vec2& v, float s);
+#define per_component_2_3(f) vec3 f(const vec3& v, float s);
+#define per_component_2_4(f) vec4 f(const vec4& v, float s);
 #endif
 #define per_component_all(func)\
     per_component_2(func)\
     per_component_3(func)\
     per_component_4(func)
+#define per_component_all_2(func)\
+    per_component_2_2(func)\
+    per_component_2_3(func)\
+    per_component_2_4(func)
 
 per_component_all(sin)
 per_component_all(cos)
@@ -231,6 +275,9 @@ per_component_all(abs)
 per_component_all(round)
 per_component_all(degrees)
 per_component_all(radians)
+
+per_component_all(trunc)
+
 // fmod
 // frexp
 // ldexp
@@ -365,18 +412,18 @@ mat4 mat4::look_at(const vec3& pos, const vec3& at, const vec3& up) {
     //	vec<3, T, Q> const u(cross(s, f));
 
     //	mat<4, 4, T, Q> Result(1);
-    //	Result[0][0] = s.x;
-    //	Result[1][0] = s.y;
-    //	Result[2][0] = s.z;
-    //	Result[0][1] = u.x;
-    //	Result[1][1] = u.y;
-    //	Result[2][1] = u.z;
-    //	Result[0][2] = -f.x;
-    //	Result[1][2] = -f.y;
-    //	Result[2][2] = -f.z;
-    //	Result[3][0] = -dot(s, eye);
-    //	Result[3][1] = -dot(u, eye);
-    //	Result[3][2] = dot(f, eye);
+    //	Result[0] = s.x;
+    //	Result[4] = s.y;
+    //	Result[8] = s.z;
+    //	Result[1] = u.x;
+    //	Result[5] = u.y;
+    //	Result[9] = u.z;
+//	Result[2] = -f.x;
+    //	Result[6] = -f.y;
+    //	Result[10] = -f.z;
+    //	Result[12] = -dot(s, eye);
+    //	Result[13] = -dot(u, eye);
+    //	Result[14] = dot(f, eye);
     //	return Result;
     //}
 }
@@ -390,8 +437,8 @@ mat4 mat4::perspective(float angle, float aspect, float zn, float zf) {
     return mat4 {
         xs, 0, 0, 0,
         0, -ys, 0, 0,
-        0, 0, zs, zb,
-        0, 0, -1, 0
+        0, 0, zs, -1,
+        0, 0, zb, 0
     };
     /*
     * Adapted from GLM source
@@ -402,11 +449,11 @@ mat4 mat4::perspective(float angle, float aspect, float zn, float zf) {
         T const w = h * height / width; ///todo max(width , Height) / min(width , Height)?
 
         mat<4, 4, T, defaultp> Result(static_cast<T>(0));
-        Result[0][0] = w;
-        Result[1][1] = h;
-        Result[2][2] = zFar / (zNear - zFar);
-        Result[2][3] = - static_cast<T>(1);
-        Result[3][2] = -(zFar * zNear) / (zFar - zNear);
+        Result[0] = w;
+        Result[5] = h;
+        Result[10] = zFar / (zNear - zFar);
+        Result[11] = - static_cast<T>(1);
+        Result[14] = -(zFar * zNear) / (zFar - zNear);
         return Result;
     }
 
@@ -435,7 +482,7 @@ mat4 mat4::ortho(float w, float h, float zn, float zf) {
         2 / (w), 0, 0, 0,
         0, 2 / h, 0, 0,
         0, 0, 1 / zd, 0,
-        0, 0, zn / zd, 1
+        0, 0, zn / zd, 1,
     };
     /*
     Adapted from GLM source
@@ -443,12 +490,12 @@ mat4 mat4::ortho(float w, float h, float zn, float zf) {
         GLM_FUNC_QUALIFIER mat<4, 4, T, defaultp> orthoRH_ZO(T left, T right, T bottom, T top, T zNear, T zFar)
         {
             mat<4, 4, T, defaultp> Result(1);
-            Result[0][0] = static_cast<T>(2) / (right - left);
-            Result[1][1] = static_cast<T>(2) / (top - bottom);
-            Result[2][2] = - static_cast<T>(1) / (zFar - zNear);
-            Result[3][0] = - (right + left) / (right - left);
-            Result[3][1] = - (top + bottom) / (top - bottom);
-            Result[3][2] = - zNear / (zFar - zNear);
+            Result[0] = static_cast<T>(2) / (right - left);
+            Result[5] = static_cast<T>(2) / (top - bottom);
+            Result[10] = - static_cast<T>(1) / (zFar - zNear);
+            Result[12] = - (right + left) / (right - left);
+            Result[13] = - (top + bottom) / (top - bottom);
+            Result[14] = - zNear / (zFar - zNear);
             return Result;
         }
     */
@@ -527,6 +574,15 @@ float length(const vec4& v) {
     return sqrt(dot(v, v));
 }
 
+float length_sq(const vec2& v) {
+    return (dot(v, v));
+}
+float length_sq(const vec3& v) {
+    return (dot(v, v));
+}
+float length_sq(const vec4& v) {
+    return (dot(v, v));
+}
 
 vec2 lerp(const vec2& x, const vec2& y, const float t) {
     return x + (y - x) * t;
@@ -537,7 +593,6 @@ vec3 lerp(const vec3& x, const vec3& y, const float t) {
 vec4 lerp(const vec4& x, const vec4& y, const float t) {
     return x + (y - x) * t;
 }
-
 
 // template<int r1, int r2, int c1, int c2>
 // float determinant2x2(const mat4& m) {
@@ -552,10 +607,173 @@ vec4 lerp(const vec4& x, const vec4& y, const float t) {
 // }
 // float determinant(const mat4& m) {
 //     return
-//         m.m[0][0] * determinant3x3<1, 2, 3, 1, 2, 3>(m) +
-//         m.m[0][1] * -determinant3x3<1, 2, 3, 0, 2, 3>(m) +
-//         m.m[0][2] * determinant3x3<1, 2, 3, 0, 1, 3>(m) +
-//         m.m[0][3] * -determinant3x3<1, 2, 3, 0, 1, 2>(m);
+//         m.m[0] * determinant3x3<1, 2, 3, 1, 2, 3>(m) +
+//         m.m[1] * -determinant3x3<1, 2, 3, 0, 2, 3>(m) +
+//         m.m[2] * determinant3x3<1, 2, 3, 0, 1, 3>(m) +
+//         m.m[3] * -determinant3x3<1, 2, 3, 0, 1, 2>(m);
 // }
+
+
+
+mat4 inverse(const mat4& m) {
+    // T Coef04 = m[2][1] * m[3][3] - m[3][1] * m[2][3];
+    // T Coef06 = m[1][1] * m[3][3] - m[3][1] * m[1][3];
+    // T Coef07 = m[1][1] * m[2][3] - m[2][1] * m[1][3];
+
+    // T Coef08 = m[2][1] * m[3][2] - m[3][1] * m[2][2];
+    // T Coef10 = m[1][1] * m[3][2] - m[3][1] * m[1][2];
+    // T Coef11 = m[1][1] * m[2][2] - m[2][1] * m[1][2];
+
+    // T Coef12 = m[2][0] * m[3][3] - m[3][0] * m[2][3];
+    // T Coef14 = m[1][0] * m[3][3] - m[3][0] * m[1][3];
+    // T Coef15 = m[1][0] * m[2][3] - m[2][0] * m[1][3];
+
+    // T Coef16 = m[2][0] * m[3][2] - m[3][0] * m[2][2];
+    // T Coef18 = m[1][0] * m[3][2] - m[3][0] * m[1][2];
+    // T Coef19 = m[1][0] * m[2][2] - m[2][0] * m[1][2];
+
+    // T Coef20 = m[2][0] * m[3][1] - m[3][0] * m[2][1];
+    // T Coef22 = m[1][0] * m[3][1] - m[3][0] * m[1][1];
+    // T Coef23 = m[1][0] * m[2][1] - m[2][0] * m[1][1];
+
+    // vec<4, T, Q> Fac0(Coef00, Coef00, Coef02, Coef03);
+    // vec<4, T, Q> Fac1(Coef04, Coef04, Coef06, Coef07);
+    // vec<4, T, Q> Fac2(Coef08, Coef08, Coef10, Coef11);
+    // vec<4, T, Q> Fac3(Coef12, Coef12, Coef14, Coef15);
+    // vec<4, T, Q> Fac4(Coef16, Coef16, Coef18, Coef19);
+    // vec<4, T, Q> Fac5(Coef20, Coef20, Coef22, Coef23);
+
+    // vec<4, T, Q> Vec0(m[1][0], m[0][0], m[0][0], m[0][0]);
+    // vec<4, T, Q> Vec1(m[1][1], m[0][1], m[0][1], m[0][1]);
+    // vec<4, T, Q> Vec2(m[1][2], m[0][2], m[0][2], m[0][2]);
+    // vec<4, T, Q> Vec3(m[1][3], m[0][3], m[0][3], m[0][3]);
+
+    // vec<4, T, Q> Inv0(Vec1 * Fac0 - Vec2 * Fac1 + Vec3 * Fac2);
+    // vec<4, T, Q> Inv1(Vec0 * Fac0 - Vec2 * Fac3 + Vec3 * Fac4);
+    // vec<4, T, Q> Inv2(Vec0 * Fac1 - Vec1 * Fac3 + Vec3 * Fac5);
+    // vec<4, T, Q> Inv3(Vec0 * Fac2 - Vec1 * Fac4 + Vec2 * Fac5);
+
+    // vec<4, T, Q> SignA(+1, -1, +1, -1);
+    // vec<4, T, Q> SignB(-1, +1, -1, +1);
+    // mat<4, 4, T, Q> Inverse(Inv0 * SignA, Inv1 * SignB, Inv2 * SignA, Inv3 * SignB);
+
+    // vec<4, T, Q> Row0(Inverse[0][0], Inverse[1][0], Inverse[2][0], Inverse[3][0]);
+
+    // vec<4, T, Q> Dot0(m[0] * Row0);
+    // T Dot1 = (Dot0.x + Dot0.y) + (Dot0.z + Dot0.w);
+
+    // T OneOverDeterminant = static_cast<T>(1) / Dot1;
+
+    // return Inverse * OneOverDeterminant;
+    float coef00 = m.m[10] * m.m[15] - m.m[14] * m.m[11];
+    float coef02 = m.m[6] * m.m[15] - m.m[14] * m.m[7];
+    float coef03 = m.m[6] * m.m[11] - m.m[10] * m.m[7];
+
+    float coef04 = m.m[9] * m.m[15] - m.m[13] * m.m[11];
+    float coef06 = m.m[5] * m.m[15] - m.m[13] * m.m[7];
+    float coef07 = m.m[5] * m.m[11] - m.m[9] * m.m[7];
+
+    float coef08 = m.m[9] * m.m[14] - m.m[13] * m.m[10];
+    float coef10 = m.m[5] * m.m[14] - m.m[13] * m.m[6];
+    float coef11 = m.m[5] * m.m[10] - m.m[9] * m.m[6];
+
+    float coef12 = m.m[8] * m.m[15] - m.m[12] * m.m[11];
+    float coef14 = m.m[4] * m.m[15] - m.m[12] * m.m[7];
+    float coef15 = m.m[4] * m.m[11] - m.m[8] * m.m[7];
+
+    float coef16 = m.m[8] * m.m[14] - m.m[12] * m.m[10];
+    float coef18 = m.m[4] * m.m[14] - m.m[12] * m.m[6];
+    float coef19 = m.m[4] * m.m[10] - m.m[8] * m.m[6];
+
+    float coef20 = m.m[8] * m.m[13] - m.m[12] * m.m[9];
+    float coef22 = m.m[4] * m.m[13] - m.m[12] * m.m[5];
+    float coef23 = m.m[4] * m.m[9] -  m.m[8] *  m.m[5];
+
+    auto fac0 = vec4(coef00, coef00, coef02, coef03);
+    auto fac1 = vec4(coef04, coef04, coef06, coef07);
+    auto fac2 = vec4(coef08, coef08, coef10, coef11);
+    auto fac3 = vec4(coef12, coef12, coef14, coef15);
+    auto fac4 = vec4(coef16, coef16, coef18, coef19);
+    auto fac5 = vec4(coef20, coef20, coef22, coef23);
+
+    auto vec0 = vec4(m.m[4], m.m[0], m.m[0], m.m[0]);
+    auto vec1 = vec4(m.m[5], m.m[1], m.m[1], m.m[1]);
+    auto vec2 = vec4(m.m[6], m.m[2], m.m[2], m.m[2]);
+    auto vec3 = vec4(m.m[7], m.m[3], m.m[3], m.m[3]);
+
+    auto inv0 = vec4(vec1 * fac0 - vec2 * fac1 + vec3 * fac2);
+    auto inv1 = vec4(vec0 * fac0 - vec2 * fac3 + vec3 * fac4);
+    auto inv2 = vec4(vec0 * fac1 - vec1 * fac3 + vec3 * fac5);
+    auto inv3 = vec4(vec0 * fac2 - vec1 * fac4 + vec2 * fac5);
+
+    auto signa = vec4(+1, -1, +1, -1);
+    auto signb = vec4(-1, +1, -1, +1);
+    auto inverse = mat4(
+        inv0 * signa,
+        inv1 * signb,
+        inv2 * signa,
+        inv3 * signb
+    );
+
+    auto row0 = vec4(inverse.m[0], inverse.m[4], inverse.m[8], inverse.m[12]);
+    auto dot0 = vec4(m.m[0], m.m[1], m.m[2], m.m[3]) * row0;
+    float dot1 = dot0.x + dot0.y + dot0.z + dot0.w;
+    float oneoverdeterminant = dot1;
+
+    return inverse * oneoverdeterminant;
+}
+
+vec2 mul(const vec2& v, const mat4& m) {
+    return vec2 {
+        v.x * m.m[0]  + v.y * m.m[1]  + m.m[2]  + m.m[3],
+        v.x * m.m[4]  + v.y * m.m[5]  + m.m[6]  + m.m[7]
+    };
+}
+vec3 mul(const vec3& v, const mat4& m) {
+    return vec3 {
+        v.x * m.m[0]  + v.y * m.m[1]  + v.z * m.m[2]  + m.m[3],
+        v.x * m.m[4]  + v.y * m.m[5]  + v.z * m.m[6]  + m.m[7],
+        v.x * m.m[8]  + v.y * m.m[9]  + v.z * m.m[10] + m.m[11]
+    };
+}
+vec4 mul(const vec4& v, const mat4& m) {
+    return vec4 {
+        v.x * m.m[0]  + v.y * m.m[1]  + v.z * m.m[2]  + v.w * m.m[3],
+        v.x * m.m[4]  + v.y * m.m[5]  + v.z * m.m[6]  + v.w * m.m[7],
+        v.x * m.m[8]  + v.y * m.m[9]  + v.z * m.m[10] + v.w * m.m[11],
+        v.x * m.m[12] + v.y * m.m[13] + v.z * m.m[14] + v.w * m.m[15],
+    };
+}
+vec2 mul_norm(const vec2& v, const mat4& m) {
+    return vec2 {
+        v.x * m.m[0]  + v.y * m.m[1],
+        v.x * m.m[4]  + v.y * m.m[5]
+    };
+}
+vec3 mul_norm(const vec3& v, const mat4& m) {
+    return vec3 {
+        v.x * m.m[0]  + v.y * m.m[1]  + v.z * m.m[2],
+        v.x * m.m[4]  + v.y * m.m[5]  + v.z * m.m[6],
+        v.x * m.m[8]  + v.y * m.m[9]  + v.z * m.m[10]
+    };
+}
+
+std::ostream& operator << (std::ostream& o, const vec2& v) {
+    return o<<"vec2 { "<<v.x<<", "<<v.y<<"}";
+}
+std::ostream& operator<<(std::ostream& o, const vec3& v) {
+    return o<<"vec2 { "<<v.x<<", "<<v.y<<", "<<v.z<<"}";
+}
+std::ostream& operator<<(std::ostream& o, const vec4& v) {
+    return o<<"vec2 { "<<v.x<<", "<<v.y<<", "<<v.z<<", "<<v.w<<"}";
+}
+std::ostream& operator<<(std::ostream& o, const mat4& m) {
+    return o<<"mat4 { "<<"\n"
+        <<"    "<<m.m[0] <<','<<m.m[1] <<','<<m.m[2] <<','<<m.m[3] << "\n"
+        <<"    "<<m.m[4] <<','<<m.m[5] <<','<<m.m[6] <<','<<m.m[7] << "\n"
+        <<"    "<<m.m[8] <<','<<m.m[9] <<','<<m.m[10]<<','<<m.m[11] << "\n"
+        <<"    "<<m.m[12]<<','<<m.m[13]<<','<<m.m[14]<<','<<m.m[15] << "\n"
+        << "}";
+}
 
 #endif

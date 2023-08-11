@@ -1,13 +1,14 @@
 # CMakeList.txt : Top-level CMake project file, do global configuration
 # and include sub-projects here.
 #
-cmake_minimum_required (VERSION 3.23)
+cmake_minimum_required (VERSION 3.22)
 
 project ("math3d")
 message("CMake Project Folder: ${PROJECT_SOURCE_DIR}")
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
+add_compile_options(-Wno-narrowing)
 
 # Add source to this project's executable.
 include_directories(math3d_test "${PROJECT_SOURCE_DIR}/../jlib/")

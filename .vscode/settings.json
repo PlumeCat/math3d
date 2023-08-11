@@ -3,5 +3,6 @@
         "*.xmacro": "cpp",
         "*.str": "rust",
         "cmath": "cpp"
-    }
+    },
+    "C_Cpp.default.compilerPath": "/usr/bin/g++"
 }
