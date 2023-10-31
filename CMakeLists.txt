@@ -12,9 +12,7 @@ add_compile_options(-Wno-narrowing)
 
 # Add source to this project's executable.
 include_directories(math3d_test "${PROJECT_SOURCE_DIR}/../jlib/")
-# add_library(math3d "src/math3d.cpp" "src/math3d.h")
 add_executable(math3d_test "src/math3d_test.cpp")
-# target_link_libraries(math3d_test math3d)
 
 message("CMake Build Type: ${CMAKE_BUILD_TYPE}")
 

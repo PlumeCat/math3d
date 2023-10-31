@@ -1,8 +1,11 @@
 {
     "files.associations": {
+        "*.tack": "rust",
         "*.xmacro": "cpp",
         "*.str": "rust",
-        "cmath": "cpp"
+        "cmath": "cpp",
+        "type_traits": "cpp",
+        "ostream": "cpp"
     },
     "C_Cpp.default.compilerPath": "/usr/bin/g++"
 }
