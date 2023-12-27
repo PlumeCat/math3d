@@ -545,36 +545,36 @@ mat4 inverse(const mat4& m) {
 
 vec2 mul(const vec2& v, const mat4& m) {
     return vec2 {
-        v.x * m.m[0]  + v.y * m.m[1]  + m.m[2]  + m.m[3],
-        v.x * m.m[4]  + v.y * m.m[5]  + m.m[6]  + m.m[7]
+        v.x * m.m[0] + v.y * m.m[1]  + m.m[2]  + m.m[3],
+        v.x * m.m[4] + v.y * m.m[5]  + m.m[6]  + m.m[7]
     };
 }
 vec3 mul(const vec3& v, const mat4& m) {
     return vec3 {
-        v.x * m.m[0]  + v.y * m.m[1]  + v.z * m.m[2]  + m.m[3],
-        v.x * m.m[4]  + v.y * m.m[5]  + v.z * m.m[6]  + m.m[7],
-        v.x * m.m[8]  + v.y * m.m[9]  + v.z * m.m[10] + m.m[11]
+        v.x * m.m[0] + v.y * m.m[4]  + v.z * m.m[8]  + m.m[12],
+        v.x * m.m[1] + v.y * m.m[5]  + v.z * m.m[9]  + m.m[13],
+        v.x * m.m[2] + v.y * m.m[6]  + v.z * m.m[10] + m.m[14]
     };
 }
 vec4 mul(const vec4& v, const mat4& m) {
     return vec4 {
-        v.x * m.m[0]  + v.y * m.m[1]  + v.z * m.m[2]  + v.w * m.m[3],
-        v.x * m.m[4]  + v.y * m.m[5]  + v.z * m.m[6]  + v.w * m.m[7],
-        v.x * m.m[8]  + v.y * m.m[9]  + v.z * m.m[10] + v.w * m.m[11],
-        v.x * m.m[12] + v.y * m.m[13] + v.z * m.m[14] + v.w * m.m[15],
+        v.x * m.m[0] + v.y * m.m[4]  + v.z * m.m[8]  + v.w * m.m[12],
+        v.x * m.m[1] + v.y * m.m[5]  + v.z * m.m[9]  + v.w * m.m[13],
+        v.x * m.m[2] + v.y * m.m[6]  + v.z * m.m[10] + v.w * m.m[14],
+        v.x * m.m[3] + v.y * m.m[7]  + v.z * m.m[11] + v.w * m.m[15],
     };
 }
 vec2 mul_norm(const vec2& v, const mat4& m) {
     return vec2 {
-        v.x * m.m[0]  + v.y * m.m[1],
-        v.x * m.m[4]  + v.y * m.m[5]
+        v.x * m.m[0] + v.y * m.m[4],
+        v.x * m.m[1] + v.y * m.m[5]
     };
 }
 vec3 mul_norm(const vec3& v, const mat4& m) {
     return vec3 {
-        v.x * m.m[0]  + v.y * m.m[1]  + v.z * m.m[2],
-        v.x * m.m[4]  + v.y * m.m[5]  + v.z * m.m[6],
-        v.x * m.m[8]  + v.y * m.m[9]  + v.z * m.m[10]
+        v.x * m.m[0] + v.y * m.m[4]  + v.z * m.m[8],
+        v.x * m.m[4] + v.y * m.m[5]  + v.z * m.m[9],
+        v.x * m.m[8] + v.y * m.m[6]  + v.z * m.m[10]
     };
 }
 
