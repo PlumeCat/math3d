@@ -339,13 +339,13 @@ mat4 mat4::perspective(float angle, float aspect, float zn, float zf) {
         0, 0, zb, 0
     };
 }
-mat4 mat4::ortho(float w, float h, float zn, float zf) {
+mat4 mat4::ortho(float x, float y, float w, float h, float zn, float zf) {
     auto zd = zn - zf;
     return mat4 {
         2 / (w), 0, 0, 0,
         0, 2 / h, 0, 0,
         0, 0, 1 / zd, 0,
-        0, 0, zn / zd, 1,
+        x, y, zn / zd, 1,
     };
 }
 
@@ -446,14 +446,14 @@ vec4 lerp(const vec4& x, const vec4& y, const float t) {
 vec2 min(const vec2& u, const vec2& v) {
     return vec2 {
         std::min(u.x, v.x),
-        std::min(u.y, v.y) 
+        std::min(u.y, v.y)
     };
 }
 vec3 min(const vec3& u, const vec3& v) {
     return vec3 {
         std::min(u.x, v.x),
         std::min(u.y, v.y),
-        std::min(u.z, v.z) 
+        std::min(u.z, v.z)
     };
 }
 vec4 min(const vec4& u, const vec4& v) {
@@ -483,6 +483,15 @@ vec4 max(const vec4& u, const vec4& v) {
         std::max(u.y, v.y),
         std::max(u.z, v.z),
         std::max(u.w, v.w)
+    };
+}
+
+mat4 transpose(const mat4& m) {
+    return {
+        m.m[0], m.m[4], m.m[8], m.m[12],
+        m.m[1], m.m[5], m.m[9], m.m[13],
+        m.m[2], m.m[6], m.m[10],m.m[14],
+        m.m[3], m.m[7], m.m[11],m.m[15],
     };
 }
 

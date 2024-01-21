@@ -26,10 +26,10 @@ namespace jm {
         vec3& operator /= (const vec3& v) { *this = *this / v; return *this; }
         vec3& operator *= (const Type f) { *this = *this * f; return *this; }
         vec3& operator /= (const Type f) { *this = *this / f; return *this; }
-    };    
+    };
     template<arithmetic T> vec3<T> operator - (const vec3<T>& v) { return { -v.x, -v.y, -v.z }; }
     template<arithmetic T> vec3<T> operator + (const vec3<T>& v) { return { +v.x, +v.y, +v.z }; }
-    
+
     template<arithmetic T, arithmetic S> vec3<T> operator + (const vec3<T>& l, S s) { return vec3<T> { l.x + (T)s, l.y + (T)s, l.z + (T)s }; }
     template<arithmetic T, arithmetic S> vec3<T> operator - (const vec3<T>& l, S s) { return vec3<T> { l.x - (T)s, l.y - (T)s, l.z - (T)s }; }
     template<arithmetic T, arithmetic S> vec3<T> operator * (const vec3<T>& l, S s) { return vec3<T> { l.x * (T)s, l.y * (T)s, l.z * (T)s }; }
@@ -46,19 +46,22 @@ namespace jm {
     template<arithmetic T> vec3<T> operator / (const vec3<T>& l, const vec3<T>& r) { return vec3<T> { l.x / r.x, l.y / r.y, l.z / r.z }; }
 
     template<arithmetic T> bool operator == (const vec3<T>& l, const vec3<T>& r) {
-        return 
-            (l.x == r.x) && 
-            (l.y == r.y) && 
+        return
+            (l.x == r.x) &&
+            (l.y == r.y) &&
             (l.z == r.z);
-    }    
+    }
     template<arithmetic T> std::ostream& operator << (std::ostream& o, const vec3<T>& v) {
         return o << "vec3 { " << v.x << ", " << v.y << ", " << v.z << " }";
     }
 
-    vec3<float>::epsilon_comparator operator~(const vec3<float>& l) { return { l.x, l.y, l.z, epsilon_f }; }
-    vec3<double>::epsilon_comparator operator~(const vec3<double>& l) { return { l.x, l.y, l.z, epsilon_d }; }
 };
 
 using vec3 = jm::vec3<float>;
 using ivec3 = jm::vec3<int32_t>;
 using uvec3 = jm::vec3<uint32_t>;
+
+#ifdef JMATH_IMPLEMENTATION
+jm::vec3<float>::epsilon_comparator operator~(const jm::vec3<float>& l) { return { l.x, l.y, l.z, epsilon_f }; }
+jm::vec3<double>::epsilon_comparator operator~(const jm::vec3<double>& l) { return { l.x, l.y, l.z, epsilon_d }; }
+#endif
