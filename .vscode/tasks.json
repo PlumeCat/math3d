@@ -6,6 +6,7 @@
         {
             "label": "make debug",
             "type": "shell",
+            "command": "make",
             "options": {
                 "cwd": "${workspaceFolder}/build/Debug"
             },
@@ -13,7 +14,6 @@
                 "kind": "build",
                 "isDefault": true
             },
-            "command": "make math3d_test"
         },
         {
             "label": "cmake debug",
@@ -24,7 +24,7 @@
                     "CMAKE_BUILD_TYPE": "Debug"
                 }
             },
-            "command": "cmake ../../ -G 'Unix Makefiles'",
+            "command": "cmake ${workspaceFolder} -G 'Unix Makefiles' -DCMAKE_BUILD_TYPE=Debug",
             "problemMatcher": []
         }
     ]

@@ -11,8 +11,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 add_compile_options(-Wno-narrowing)
 
 # Add source to this project's executable.
-include_directories(math3d_test "${PROJECT_SOURCE_DIR}/../jlib/")
 add_executable(math3d_test "src/math3d_test.cpp")
+include_directories(math3d_test "${PROJECT_SOURCE_DIR}/../jlib/")
 
 message("CMake Build Type: ${CMAKE_BUILD_TYPE}")
 

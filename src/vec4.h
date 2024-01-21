@@ -42,7 +42,7 @@ namespace jm {
     template<arithmetic T> bool operator == (const vec4<T>& l, const vec4<T>& r) { return l.x == r.x && l.y == r.y && l.z == r.z && l.w == r.w; }
 
     template<arithmetic T> std::ostream& operator << (std::ostream& o, const vec4<T>& v) {
-        return o << "vec4 { " << v.x << ", " << v.y << ", " << v.z << ", " << v.w << "}";
+        return o << "vec4 { " << v.x << ", " << v.y << ", " << v.z << ", " << v.w << " }";
     }
 };
 

@@ -18,6 +18,8 @@ template<typename T> concept signed_arithmetic = arithmetic<T> && (std::is_signe
 static const float pi = 3.1415926535f;
 static const float degtorad = pi / 180.f;
 static const float radtodeg = 180.f / pi;
+static const float epsilon_f = 0.000001f;
+static const float epsilon_d = 0.0000000000000001;
 float degrees(float r);
 float radians(float d);
 float saturate(float x);
@@ -545,8 +547,8 @@ mat4 inverse(const mat4& m) {
 
 vec2 mul(const vec2& v, const mat4& m) {
     return vec2 {
-        v.x * m.m[0] + v.y * m.m[1]  + m.m[2]  + m.m[3],
-        v.x * m.m[4] + v.y * m.m[5]  + m.m[6]  + m.m[7]
+        v.x * m.m[0] + v.y * m.m[4]  + m.m[8]  + m.m[12],
+        v.x * m.m[1] + v.y * m.m[5]  + m.m[9]  + m.m[13]
     };
 }
 vec3 mul(const vec3& v, const mat4& m) {
@@ -573,8 +575,8 @@ vec2 mul_norm(const vec2& v, const mat4& m) {
 vec3 mul_norm(const vec3& v, const mat4& m) {
     return vec3 {
         v.x * m.m[0] + v.y * m.m[4]  + v.z * m.m[8],
-        v.x * m.m[4] + v.y * m.m[5]  + v.z * m.m[9],
-        v.x * m.m[8] + v.y * m.m[6]  + v.z * m.m[10]
+        v.x * m.m[1] + v.y * m.m[5]  + v.z * m.m[9],
+        v.x * m.m[2] + v.y * m.m[6]  + v.z * m.m[10]
     };
 }
 
