@@ -8,6 +8,7 @@ namespace jm {
         vec4() { x = 0; y = 0; z = 0; w = 0; }
         vec4(Type t): x(t), y(t), z(t), w(t) {}
         vec4(Type x, Type y, Type z, Type w): x(x), y(y), z(z), w(w) {}
+        template<arithmetic Other> vec4(const vec4<Other>& other): x(other.x), y(other.y), z(other.z), w(other.w) {}
         vec4(const vec4&) = default;
         vec4(vec4&&) = default;
         vec4& operator=(const vec4&) = default;

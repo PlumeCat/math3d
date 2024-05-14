@@ -32,9 +32,16 @@ float step(float x, float edge);
 #include "mat4.h"
 #include "perlin_noise.h"
 
-float dot(const vec2& u, const vec2& v);
-float dot(const vec3& u, const vec3& v);
-float dot(const vec4& u, const vec4& v);
+
+template<typename A, typename B> float dot(jm::vec2<A> u, jm::vec2<B> v) {
+    return u.x * v.x + u.y * v.y;
+}
+template<typename A, typename B> float dot(const jm::vec3<A>& u, const jm::vec3<B>& v) {
+    return u.x * v.x + u.y * v.y + u.z * v.z;
+}
+template<typename A, typename B> float dot(const jm::vec4<A>& u, const jm::vec4<B>& v) {
+    return u.x * v.x + u.y * v.y + u.z * v.z + u.w * v.w;
+}
 
 vec3 cross(const vec3& u, const vec3& v);
 vec3 reflect(const vec3& v, const vec3& n);
@@ -381,16 +388,6 @@ mat4 mat4::operator*(const mat4& _) {
         m[12] * _.m[2] + m[13] * _.m[6] + m[14] * _.m[10] + m[15] * _.m[14],
         m[12] * _.m[3] + m[13] * _.m[7] + m[14] * _.m[11] + m[15] * _.m[15]
     };
-}
-
-float dot(const vec2& u, const vec2& v) {
-    return u.x * v.x + u.y * v.y;
-}
-float dot(const vec3& u, const vec3& v) {
-    return u.x * v.x + u.y * v.y + u.z * v.z;
-}
-float dot(const vec4& u, const vec4& v) {
-    return u.x * v.x + u.y * v.y + u.z * v.z + u.w * v.w;
 }
 
 vec3 cross(const vec3& u, const vec3& v) {

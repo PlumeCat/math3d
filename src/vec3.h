@@ -9,8 +9,10 @@ namespace jm {
         vec3() { x = 0; y = 0; z = 0; }
         vec3(Type t): x(t), y(t), z(t) {}
         vec3(Type x, Type y, Type z): x(x), y(y), z(z) {}
+        template<arithmetic Other> vec3(const vec3<Other>& other): x(other.x), y(other.y), z(other.z) {}
         vec3(const vec3&) = default;
         vec3(vec3&&) = default;
+        
         bool operator=(const epsilon_comparator& e) {
             return
                 (abs(e.x - x) < e.epsilon) &&

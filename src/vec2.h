@@ -8,6 +8,7 @@ namespace jm {
         vec2() { x = 0; y = 0; }
         vec2(Type t): x(t), y(t) {}
         vec2(Type x, Type y): x(x), y(y) {}
+        template<arithmetic Other> vec2(const vec2<Other>& other): x(other.x), y(other.y) {}
         vec2(const vec2&) = default;
         vec2(vec2&&) = default;
         vec2& operator=(const vec2&) = default;
