@@ -70,6 +70,7 @@ float distance(const vec4& a, const vec4& b);
 vec2 lerp(const vec2& x, const vec2& y, const float t);
 vec3 lerp(const vec3& x, const vec3& y, const float t);
 vec4 lerp(const vec4& x, const vec4& y, const float t);
+vec4 slerp(const vec4& x, const vec4& y, const float t);
 
 vec2 min(const vec2& x, const vec2& y);
 vec3 min(const vec3& x, const vec3& y);
@@ -320,6 +321,39 @@ mat4 mat4::rotate_z(float z) {
         0,  0, 0, 1
     };
 }
+mat4 mat4::rotate_quat(const vec4& q) {
+    const auto q0 = q.w;
+    const auto q1 = q.x;
+    const auto q2 = q.y;
+    const auto q3 = q.z;
+
+    // First row of the rotation matrix
+    const auto r00 = 2 * (q0 * q0 + q1 * q1) - 1;
+    const auto r01 = 2 * (q1 * q2 - q0 * q3);
+    const auto r02 = 2 * (q1 * q3 + q0 * q2);
+
+    // Second row of the rotation matrix
+    const auto r10 = 2 * (q1 * q2 + q0 * q3);
+    const auto r11 = 2 * (q0 * q0 + q2 * q2) - 1;
+    const auto r12 = 2 * (q2 * q3 - q0 * q1);
+
+    // Third row of the rotation matrix
+    const auto r20 = 2 * (q1 * q3 - q0 * q2);
+    const auto r21 = 2 * (q2 * q3 + q0 * q1);
+    const auto r22 = 2 * (q0 * q0 + q3 * q3) - 1;
+
+    // 3x3 rotation matrix
+    /*rot_matrix = np.array([[r00, r01, r02],
+                            [r10, r11, r12],
+                            [r20, r21, r22]] )*/
+
+    return mat4 {
+        r00, r01, r02, 0,
+        r10, r11, r12, 0,
+        r20, r21, r22, 0,
+        0,   0,   0,   1
+    };
+}
 mat4 mat4::look_at(const vec3& pos, const vec3& at, const vec3& up) {
     auto az = normalize(at - pos);
     auto ax = normalize(cross(az, up));
@@ -366,7 +400,7 @@ mat4 mat4::world(const vec3& fd, const vec3& up, const vec3& pos) {
     };
 }
 
-mat4 mat4::operator*(const mat4& _) {
+mat4 mat4::operator*(const mat4& _) const {
     return mat4 {
         m[0] * _.m[0] + m[1] * _.m[4] + m[2] * _.m[8] + m[3] * _.m[12],
         m[0] * _.m[1] + m[1] * _.m[5] + m[2] * _.m[9] + m[3] * _.m[13],
@@ -438,6 +472,11 @@ vec3 lerp(const vec3& x, const vec3& y, const float t) {
 }
 vec4 lerp(const vec4& x, const vec4& y, const float t) {
     return x + (y - x) * t;
+}
+vec4 slerp(const vec4& x, const vec4& y, const float t) {
+    auto d = dot(x, y);
+    auto w = acosf(abs(d));
+    return (sinf((1 - t) * w) * (d < 0 ? -1 : 1) * x + sinf(t * w) * y) / sinf(w);
 }
 
 vec2 min(const vec2& u, const vec2& v) {
