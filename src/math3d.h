@@ -475,7 +475,8 @@ vec4 lerp(const vec4& x, const vec4& y, const float t) {
 }
 vec4 slerp(const vec4& x, const vec4& y, const float t) {
     auto d = dot(x, y);
-    auto w = acosf(abs(d));
+    auto w = acosf(std::min(abs(d), 1.0f));
+    if (w < 0.001) { return y; }
     return (sinf((1 - t) * w) * (d < 0 ? -1 : 1) * x + sinf(t * w) * y) / sinf(w);
 }
 
