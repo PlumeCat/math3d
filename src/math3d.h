@@ -359,6 +359,18 @@ mat4 mat4::look_at(const vec3& pos, const vec3& at, const vec3& up) {
         -dot(ax, pos), -dot(ay, pos), dot(az, pos),  1
     };
 }
+mat4 mat4::look(const vec3& look, const vec3& up) {
+    auto az = normalize(look);
+    auto ax = normalize(cross(az, up));
+    auto ay = cross(ax, az);
+
+    return mat4 {
+        ax.x, ay.x, -az.x, 0,
+        ax.y, ay.y, -az.y, 0,
+        ax.z, ay.z, -az.z, 0,
+        0,    0,    0,    1
+    };
+}
 mat4 mat4::perspective(float angle, float aspect, float zn, float zf) {
     auto ys = 1.f / tan(angle / 2.f);
     auto xs = ys / aspect;
@@ -376,10 +388,10 @@ mat4 mat4::perspective(float angle, float aspect, float zn, float zf) {
 mat4 mat4::ortho(float x, float y, float w, float h, float zn, float zf) {
     auto zd = zn - zf;
     return mat4 {
-        2 / (w), 0, 0, 0,
+        2 / w, 0, 0, 0,
         0, 2 / h, 0, 0,
         0, 0, 1 / zd, 0,
-        x, y, zn / zd, 1,
+        x/w, y/h, zn / zd, 1,
     };
 }
 
