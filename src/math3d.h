@@ -342,11 +342,6 @@ mat4 mat4::rotate_quat(const vec4& q) {
     const auto r21 = 2 * (q2 * q3 + q0 * q1);
     const auto r22 = 2 * (q0 * q0 + q3 * q3) - 1;
 
-    // 3x3 rotation matrix
-    /*rot_matrix = np.array([[r00, r01, r02],
-                            [r10, r11, r12],
-                            [r20, r21, r22]] )*/
-
     return mat4 {
         r00, r01, r02, 0,
         r10, r11, r12, 0,
@@ -366,6 +361,18 @@ mat4 mat4::look_at(const vec3& pos, const vec3& at, const vec3& up) {
         -dot(ax, pos), -dot(ay, pos), dot(az, pos),  1
     };
 }
+mat4 mat4::look(const vec3& look, const vec3& up) {
+    auto az = normalize(look);
+    auto ax = normalize(cross(az, up));
+    auto ay = cross(ax, az);
+
+    return mat4 {
+        ax.x, ay.x, -az.x, 0,
+        ax.y, ay.y, -az.y, 0,
+        ax.z, ay.z, -az.z, 0,
+        0,    0,    0,    1
+    };
+}
 mat4 mat4::perspective(float angle, float aspect, float zn, float zf) {
     auto ys = 1.f / tan(angle / 2.f);
     auto xs = ys / aspect;
@@ -383,10 +390,10 @@ mat4 mat4::perspective(float angle, float aspect, float zn, float zf) {
 mat4 mat4::ortho(float x, float y, float w, float h, float zn, float zf) {
     auto zd = zn - zf;
     return mat4 {
-        2 / (w), 0, 0, 0,
+        2 / w, 0, 0, 0,
         0, 2 / h, 0, 0,
         0, 0, 1 / zd, 0,
-        x, y, zn / zd, 1,
+        x/w, y/h, zn / zd, 1,
     };
 }
 
