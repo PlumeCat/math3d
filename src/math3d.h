@@ -7,39 +7,49 @@
 template<typename T> concept arithmetic = std::integral<T> || std::floating_point<T>;
 template<typename T> concept signed_arithmetic = arithmetic<T> && (std::is_signed_v<T> || std::floating_point<T>);
 
-// #ifndef JMATH_ENABLE_SSE2
-// #define JMATH_ENABLE_SSE2
-// #endif
-// #ifdef JMATH_ENABLE_SSE2
-// #include <xmmintrin.h>
-// #endif
-// using SIMD = __m128;
-
 static const float pi = 3.1415926535f;
 static const float degtorad = pi / 180.f;
 static const float radtodeg = 180.f / pi;
-static const float epsilon_f = 0.000001f;
-static const float epsilon_d = 0.0000000000000001;
+
+template<std::floating_point T> T epsilon() { static_assert(false); };
+template<> float epsilon() { return 0.000001f; }
+template<> double epsilon() { return 0.0000000000000001; }
+
+#include "vec2.h"
+#include "vec3.h"
+#include "vec4.h"
+
+using vec2 = jm::vec2<float>;
+using ivec2 = jm::vec2<int32_t>;
+using uvec2 = jm::vec2<uint32_t>;
+
+using vec3 = jm::vec3<float>;
+using ivec3 = jm::vec3<int32_t>;
+using uvec3 = jm::vec3<uint32_t>;
+
+using vec4 = jm::vec4<float>;
+using ivec4 = jm::vec4<int32_t>;
+using uvec4 = jm::vec4<uint32_t>;
+
+#include "mat4.h"
+#include "perlin_noise.h"
+
 float degrees(float r);
 float radians(float d);
 float saturate(float x);
 float clamp(float a, float b, float x);
 float step(float x, float edge);
 
-#include "vec2.h"
-#include "vec3.h"
-#include "vec4.h"
-#include "mat4.h"
-#include "perlin_noise.h"
+// lowest containing field
+template<typename A, typename B> using LCF = decltype(A()*B() + A()*B());
 
-
-template<typename A, typename B> float dot(jm::vec2<A> u, jm::vec2<B> v) {
+template<typename A, typename B> LCF<A,B> dot(jm::vec2<A> u, jm::vec2<B> v) {
     return u.x * v.x + u.y * v.y;
 }
-template<typename A, typename B> float dot(const jm::vec3<A>& u, const jm::vec3<B>& v) {
+template<typename A, typename B> LCF<A,B> dot(const jm::vec3<A>& u, const jm::vec3<B>& v) {
     return u.x * v.x + u.y * v.y + u.z * v.z;
 }
-template<typename A, typename B> float dot(const jm::vec4<A>& u, const jm::vec4<B>& v) {
+template<typename A, typename B> LCF<A,B> dot(const jm::vec4<A>& u, const jm::vec4<B>& v) {
     return u.x * v.x + u.y * v.y + u.z * v.z + u.w * v.w;
 }
 
@@ -183,16 +193,9 @@ per_component_vvv(clamp)
 // frac
 // modf(x, &i)  -> f | x = i + f (i integer, 0 <= f < 1)
 
-// pow
-// sign
 // smoothstep
 // smootherstep
-// lerp
-// slerp
-// clamp
 // atan2 in some form ("angle" for vec2?)
-// min
-// max
 
 /*
 
@@ -216,7 +219,7 @@ packing
     short
     shortn
     ushortn
-    half
+    fp16
 
 some intersection stuff?
     closest_point(line, point)
@@ -322,36 +325,26 @@ mat4 mat4::rotate_z(float z) {
     };
 }
 mat4 mat4::rotate_quat(const vec4& q) {
-    const auto q0 = q.w;
-    const auto q1 = q.x;
-    const auto q2 = q.y;
-    const auto q3 = q.z;
-
     // First row of the rotation matrix
-    const auto r00 = 2 * (q0 * q0 + q1 * q1) - 1;
-    const auto r01 = 2 * (q1 * q2 - q0 * q3);
-    const auto r02 = 2 * (q1 * q3 + q0 * q2);
+    const auto x0 = 2 * (q.w * q.w + q.x * q.x) - 1;
+    const auto x1 = 2 * (q.x * q.y - q.w * q.z);
+    const auto x2 = 2 * (q.x * q.z + q.w * q.y);
 
     // Second row of the rotation matrix
-    const auto r10 = 2 * (q1 * q2 + q0 * q3);
-    const auto r11 = 2 * (q0 * q0 + q2 * q2) - 1;
-    const auto r12 = 2 * (q2 * q3 - q0 * q1);
+    const auto y0 = 2 * (q.x * q.y + q.w * q.z);
+    const auto y1 = 2 * (q.w * q.w + q.y * q.y) - 1;
+    const auto y2 = 2 * (q.y * q.z - q.w * q.x);
 
     // Third row of the rotation matrix
-    const auto r20 = 2 * (q1 * q3 - q0 * q2);
-    const auto r21 = 2 * (q2 * q3 + q0 * q1);
-    const auto r22 = 2 * (q0 * q0 + q3 * q3) - 1;
-
-    // 3x3 rotation matrix
-    /*rot_matrix = np.array([[r00, r01, r02],
-                            [r10, r11, r12],
-                            [r20, r21, r22]] )*/
+    const auto z0 = 2 * (q.x * q.z - q.w * q.y);
+    const auto z1 = 2 * (q.y * q.z + q.w * q.x);
+    const auto z2 = 2 * (q.w * q.w + q.z * q.z) - 1;
 
     return mat4 {
-        r00, r01, r02, 0,
-        r10, r11, r12, 0,
-        r20, r21, r22, 0,
-        0,   0,   0,   1
+        x0, x1, x2, 0,
+        y0, y1, y2, 0,
+        z0, z1, z2, 0,
+        0,  0,  0,  1
     };
 }
 mat4 mat4::look_at(const vec3& pos, const vec3& at, const vec3& up) {

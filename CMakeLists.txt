@@ -25,4 +25,3 @@ elseif (CMAKE_BUILD_TYPE STREQUAL Debug)
 else()
 	message("WARNING: UNKNOWN BUILD TYPE <${CMAKE_BUILD_TYPE}>")
 endif()
-

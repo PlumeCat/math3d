@@ -1,11 +1,14 @@
 {
     "files.associations": {
-        "*.tack": "rust",
         "*.xmacro": "cpp",
         "*.str": "rust",
+        "*.tack": "rust",
+        "*.pipeline": "glsl",
+        "*.glsli": "glsl",
         "cmath": "cpp",
         "type_traits": "cpp",
-        "ostream": "cpp"
+        "ostream": "cpp",
+        "source_location": "cpp"
     },
-    "C_Cpp.default.compilerPath": "/usr/bin/g++"
+    "C_Cpp.default.compilerPath": "/opt/homebrew/opt/llvm/bin/clang++"
 }

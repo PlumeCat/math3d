@@ -5,7 +5,7 @@ namespace jm {
     struct vec4 {
         Type x, y, z, w;
 
-        vec4() { x = 0; y = 0; z = 0; w = 0; }
+        vec4(): x(0), y(0), z(0), w(0) {}
         vec4(Type t): x(t), y(t), z(t), w(t) {}
         vec4(Type x, Type y, Type z, Type w): x(x), y(y), z(z), w(w) {}
         template<arithmetic Other> vec4(const vec4<Other>& other): x(other.x), y(other.y), z(other.z), w(other.w) {}
@@ -46,7 +46,3 @@ namespace jm {
         return o << "vec4 { " << v.x << ", " << v.y << ", " << v.z << ", " << v.w << " }";
     }
 };
-
-using vec4 = jm::vec4<float>;
-using ivec4 = jm::vec4<int32_t>;
-using uvec4 = jm::vec4<uint32_t>;

@@ -7,16 +7,31 @@
 #include <jlib/test_framework.h>
 #include <iostream>
 
-TEST("vec2 equality") {
-    auto v = vec2(1, 2);
-    auto w = vec2(1, 2);
-    ASSERT(v == w);
-    ASSERT(v == v);
-    ASSERT(w == w);
-}
+// 6x constructor
+// 6x op-assign operator
+// 2x assignment operator
+// 14x bin ops
+// equality & near-equality
+
+CHECK(vec2(1, 2) == vec2(1, 2))
+CHECK(vec2(1.f, 0.f).x == 1.f)
+CHECK(vec2(0.f, 1.f).y == 1.f)
+
+CHECK(vec2().x == 0 && vec2().y == 0)
+
+CHECK(vec2() + vec2() == vec2())
+CHECK(vec2() - vec2() == vec2())
+
+CHECK(vec2() == vec2(0, 0))
+CHECK(vec2(0, 0) =~ vec2(0.0000001, 0.0000001));
+CHECK(vec2(0, 0) =~ vec2(-0.0000001, -0.0000001));
+
+
+TEST("vec2 self equality") { auto v = vec2(1, 2); ASSERT(v == v); }
 TEST("vec2 ctor") {
     auto v = vec2(1, 2);
     ASSERT(v == vec2(1, 2));
+    ASSERT(v.x == 1 && v.y == 2);
     v = vec2(3);
     ASSERT(v == vec2(3));
     v = vec2(vec2(vec2(40)));
@@ -91,9 +106,9 @@ TEST("vec3 mul_norm") {
 
 
 TEST("disabled negation for uvec") {
-    auto test1 = uvec3(1, 2, 3);
-    auto test2 = uvec3(5, 6, 7);
-    auto test3 = test2 - test1;
+    // auto test1 = uvec3(1, 2, 3);
+    // auto test2 = uvec3(5, 6, 7);
+    // auto test3 = test2 - test1;
 }
 
 TEST("inverse scale") {
