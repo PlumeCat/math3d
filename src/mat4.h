@@ -1,6 +1,6 @@
 #pragma once
 
-struct mat4 {
+struct alignas(16) mat4 {
     #ifdef JMATH_ENABLE_SSE2
     // SIMD rows[4];
     #else

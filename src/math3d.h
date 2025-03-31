@@ -4,8 +4,24 @@
 #include <iostream>
 #include <type_traits>
 
-template<typename T> concept arithmetic = std::integral<T> || std::floating_point<T>;
-template<typename T> concept signed_arithmetic = arithmetic<T> && (std::is_signed_v<T> || std::floating_point<T>);
+template<typename T> concept scalar = std::integral<T> || std::floating_point<T>;
+
+template <typename T, template <typename...> class Z>
+struct is_specialization_of : std::false_type {};
+
+template <typename... Args, template <typename...> class Z>
+struct is_specialization_of<Z<Args...>, Z> : std::true_type {};
+
+template <typename T, template <typename...> class Z>
+inline constexpr bool IsSpecializationOf = is_specialization_of<T,Z>::value;
+
+// #ifndef JMATH_ENABLE_SSE2
+// #define JMATH_ENABLE_SSE2
+// #endif
+// #ifdef JMATH_ENABLE_SSE2
+// #include <xmmintrin.h>
+// #endif
+// using SIMD = __m128;
 
 static const float pi = 3.1415926535f;
 static const float degtorad = pi / 180.f;
@@ -40,18 +56,15 @@ float saturate(float x);
 float clamp(float a, float b, float x);
 float step(float x, float edge);
 
-// lowest containing field
-template<typename A, typename B> using LCF = decltype(A()*B() + A()*B());
+#include "vec2.h"
+#include "vec3.h"
+#include "vec4.h"
+#include "mat4.h"
+#include "perlin_noise.h"
 
-template<typename A, typename B> LCF<A,B> dot(jm::vec2<A> u, jm::vec2<B> v) {
-    return u.x * v.x + u.y * v.y;
-}
-template<typename A, typename B> LCF<A,B> dot(const jm::vec3<A>& u, const jm::vec3<B>& v) {
-    return u.x * v.x + u.y * v.y + u.z * v.z;
-}
-template<typename A, typename B> LCF<A,B> dot(const jm::vec4<A>& u, const jm::vec4<B>& v) {
-    return u.x * v.x + u.y * v.y + u.z * v.z + u.w * v.w;
-}
+using jm::IsVec2;
+using jm::IsVec3;
+using jm::IsVec4;
 
 vec3 cross(const vec3& u, const vec3& v);
 vec3 reflect(const vec3& v, const vec3& n);
@@ -65,14 +78,6 @@ vec2 normalize(const vec2& v);
 vec3 normalize(const vec3& v);
 vec4 normalize(const vec4& v);
 
-float length(const vec2& v);
-float length(const vec3& v);
-float length(const vec4& v);
-
-float length_sq(const vec2& v);
-float length_sq(const vec3& v);
-float length_sq(const vec4& v);
-
 float distance(const vec2& a, const vec2& b);
 float distance(const vec3& a, const vec3& b);
 float distance(const vec4& a, const vec4& b);
@@ -81,13 +86,6 @@ vec2 lerp(const vec2& x, const vec2& y, const float t);
 vec3 lerp(const vec3& x, const vec3& y, const float t);
 vec4 lerp(const vec4& x, const vec4& y, const float t);
 vec4 slerp(const vec4& x, const vec4& y, const float t);
-
-vec2 min(const vec2& x, const vec2& y);
-vec3 min(const vec3& x, const vec3& y);
-vec4 min(const vec4& x, const vec4& y);
-vec2 max(const vec2& x, const vec2& y);
-vec3 max(const vec3& x, const vec3& y);
-vec4 max(const vec4& x, const vec4& y);
 
 vec2 mul(const vec2& v, const mat4& m);
 vec3 mul(const vec3& v, const mat4& m);
@@ -99,22 +97,81 @@ mat4 transpose(const mat4& m);
 mat4 inverse(const mat4& m);
 float determinant(const mat4& m);
 
-template<arithmetic A> A min(A l, A r) { return std::min(l, r); }
-template<arithmetic A> A max(A l, A r) { return std::min(l, r); }
+
+auto dot(const IsVec2 auto& u, const IsVec2 auto& v) { return u.x * v.x + u.y * v.y; }
+auto dot(const IsVec3 auto& u, const IsVec3 auto& v) { return u.x * v.x + u.y * v.y + u.z * v.z; }
+auto dot(const IsVec4 auto& u, const IsVec4 auto& v) { return u.x * v.x + u.y * v.y + u.z * v.z + u.w * v.w; }
+
+auto length_sq(const IsVec2 auto& v) { return dot(v, v); }
+auto length_sq(const IsVec3 auto& v) { return dot(v, v); }
+auto length_sq(const IsVec4 auto& v) { return dot(v, v); }
+float length(const IsVec3 auto& v) { return sqrtf(length_sq(v)); }
+float length(const IsVec4 auto& v) { return sqrtf(length_sq(v)); }
+float length(const IsVec2 auto& v) { return sqrtf(length_sq(v)); }
+
+auto min(scalar auto a, scalar auto b) { return (a < b) ? a : b; }
+auto max(scalar auto a, scalar auto b) { return (a > b) ? a : b; }
+
+auto abs(const IsVec2 auto& v) { return jm::vec2 { abs(v.x), abs(v.y) }; }
+auto abs(const IsVec3 auto& v) { return jm::vec3 { abs(v.x), abs(v.y), abs(v.z) }; }
+auto abs(const IsVec4 auto& v) { return jm::vec4 { abs(v.x), abs(v.y), abs(v.z), abs(v.w) }; }
+
+auto min(const IsVec2 auto& u, const IsVec2 auto& v) {
+    return jm::vec2 {
+        min(u.x, v.x),
+        min(u.y, v.y)
+    };
+}
+auto min(const IsVec3 auto& u, const IsVec3 auto& v) {
+    return jm::vec3 {
+        min(u.x, v.x),
+        min(u.y, v.y),
+        min(u.z, v.z)
+    };
+}
+auto min(const IsVec4 auto& u, const IsVec4 auto& v) {
+    return jm::vec4 {
+        min(u.x, v.x),
+        min(u.y, v.y),
+        min(u.z, v.z),
+        min(u.w, v.w)
+    };
+}
+auto max(const IsVec2 auto& u, const IsVec2 auto& v) {
+    return jm::vec2 {
+        max(u.x, v.x),
+        max(u.y, v.y)
+    };
+}
+auto max(const IsVec3 auto& u, const IsVec3 auto& v) {
+    return jm::vec3 {
+        max(u.x, v.x),
+        max(u.y, v.y),
+        max(u.z, v.z)
+    };
+}
+auto max(const IsVec4 auto& u, const IsVec4 auto& v) {
+    return jm::vec4 {
+        max(u.x, v.x),
+        max(u.y, v.y),
+        max(u.z, v.z),
+        max(u.w, v.w)
+    };
+}
 
 #ifdef JMATH_IMPLEMENTATION
-#define per_component_v2(f) vec2 f(const vec2& v) { return { f(v.x), f(v.y) }; }
-#define per_component_v3(f) vec3 f(const vec3& v) { return { f(v.x), f(v.y), f(v.z) }; }
-#define per_component_v4(f) vec4 f(const vec4& v) { return { f(v.x), f(v.y), f(v.z), f(v.w) }; }
-#define per_component_v2s(f) vec2 f(const vec2& v, float s) { return { f(v.x, s), f(v.y, s) }; }
-#define per_component_v3s(f) vec3 f(const vec3& v, float s) { return { f(v.x, s), f(v.y, s), f(v.z, s) }; }
-#define per_component_v4s(f) vec4 f(const vec4& v, float s) { return { f(v.x, s), f(v.y, s), f(v.z, s), f(v.w, s) }; }
-#define per_component_v2v2(f) vec2 f(const vec2& v1, const vec2& v2) { return { f(v1.x, v2.x), f(v1.y, v2.y) }; }
-#define per_component_v3v3(f) vec3 f(const vec3& v1, const vec3& v2) { return { f(v1.x, v2.x), f(v1.y, v2.y), f(v1.z, v2.z) }; }
-#define per_component_v4v4(f) vec4 f(const vec4& v1, const vec4& v2) { return { f(v1.x, v2.x), f(v1.y, v2.y), f(v1.z, v2.z), f(v1.w, v2.w) }; }
-#define per_component_v2v2v2(f) vec2 f(const vec2& v1, const vec2& v2, const vec2& v3) { return { f(v1.x, v2.x, v3.x), f(v1.y, v2.y, v3.y) }; }
-#define per_component_v3v3v3(f) vec3 f(const vec3& v1, const vec3& v2, const vec3& v3) { return { f(v1.x, v2.x, v3.x), f(v1.y, v2.y, v3.y), f(v1.z, v2.z, v3.z) }; }
-#define per_component_v4v4v4(f) vec4 f(const vec4& v1, const vec4& v2, const vec4& v3) { return { f(v1.x, v2.x, v3.x), f(v1.y, v2.y, v3.y), f(v1.z, v2.z, v3.z), f(v1.w, v2.w, v3.w) }; }
+#define per_component_v2(f) vec2 f(const vec2& v) { return vec2 { f(v.x), f(v.y) }; }
+#define per_component_v3(f) vec3 f(const vec3& v) { return vec3 { f(v.x), f(v.y), f(v.z) }; }
+#define per_component_v4(f) vec4 f(const vec4& v) { return vec4 { f(v.x), f(v.y), f(v.z), f(v.w) }; }
+#define per_component_v2s(f) vec2 f(const vec2& v, float s) { return vec2 { f(v.x, s), f(v.y, s) }; }
+#define per_component_v3s(f) vec3 f(const vec3& v, float s) { return vec3 { f(v.x, s), f(v.y, s), f(v.z, s) }; }
+#define per_component_v4s(f) vec4 f(const vec4& v, float s) { return vec4 { f(v.x, s), f(v.y, s), f(v.z, s), f(v.w, s) }; }
+#define per_component_v2v2(f) vec2 f(const vec2& v1, const vec2& v2) { return vec2 { f(v1.x, v2.x), f(v1.y, v2.y) }; }
+#define per_component_v3v3(f) vec3 f(const vec3& v1, const vec3& v2) { return vec3 { f(v1.x, v2.x), f(v1.y, v2.y), f(v1.z, v2.z) }; }
+#define per_component_v4v4(f) vec4 f(const vec4& v1, const vec4& v2) { return vec4 { f(v1.x, v2.x), f(v1.y, v2.y), f(v1.z, v2.z), f(v1.w, v2.w) }; }
+#define per_component_v2v2v2(f) vec2 f(const vec2& v1, const vec2& v2, const vec2& v3) { return vec2 { f(v1.x, v2.x, v3.x), f(v1.y, v2.y, v3.y) }; }
+#define per_component_v3v3v3(f) vec3 f(const vec3& v1, const vec3& v2, const vec3& v3) { return vec3 { f(v1.x, v2.x, v3.x), f(v1.y, v2.y, v3.y), f(v1.z, v2.z, v3.z) }; }
+#define per_component_v4v4v4(f) vec4 f(const vec4& v1, const vec4& v2, const vec4& v3) { return vec4 { f(v1.x, v2.x, v3.x), f(v1.y, v2.y, v3.y), f(v1.z, v2.z, v3.z), f(v1.w, v2.w, v3.w) }; }
 #else
 #define per_component_v2(f) vec2 f(const vec2& v);
 #define per_component_v3(f) vec3 f(const vec3& v);
@@ -173,7 +230,6 @@ per_component(log10)
 
 per_component(floor)
 per_component(ceil)
-per_component(abs)
 per_component(round)
 per_component(degrees)
 per_component(radians)
@@ -252,20 +308,20 @@ float step(float edge, float x) {
 
 
 vec2 sign(const vec2& v) {
-    return {
+    return vec2 {
         std::signbit(v.x) ? -1.f : 1.f,
         std::signbit(v.y) ? -1.f : 1.f
     };
 }
 vec3 sign(const vec3& v) {
-    return {
+    return vec3 {
         std::signbit(v.x) ? -1.f : 1.f,
         std::signbit(v.y) ? -1.f : 1.f,
         std::signbit(v.z) ? -1.f : 1.f
     };
 }
 vec4 sign(const vec4& v) {
-    return {
+    return vec4 {
         std::signbit(v.x) ? -1.f : 1.f,
         std::signbit(v.y) ? -1.f : 1.f,
         std::signbit(v.z) ? -1.f : 1.f,
@@ -430,7 +486,7 @@ mat4 mat4::operator*(const mat4& _) const {
 }
 
 vec3 cross(const vec3& u, const vec3& v) {
-    return {
+    return vec3 {
         u.y * v.z - u.z * v.y,
         u.z * v.x - u.x * v.z,
         u.x * v.y - u.y * v.x
@@ -449,26 +505,6 @@ vec4 normalize(const vec4& v) {
     return v / length(v);
 }
 
-float length(const vec2& v) {
-    return sqrt(dot(v, v));
-}
-float length(const vec3& v) {
-    return sqrt(dot(v, v));
-}
-float length(const vec4& v) {
-    return sqrt(dot(v, v));
-}
-
-float length_sq(const vec2& v) {
-    return (dot(v, v));
-}
-float length_sq(const vec3& v) {
-    return (dot(v, v));
-}
-float length_sq(const vec4& v) {
-    return (dot(v, v));
-}
-
 vec2 lerp(const vec2& x, const vec2& y, const float t) {
     return x + (y - x) * t;
 }
@@ -480,52 +516,9 @@ vec4 lerp(const vec4& x, const vec4& y, const float t) {
 }
 vec4 slerp(const vec4& x, const vec4& y, const float t) {
     auto d = dot(x, y);
-    auto w = acosf(std::min(abs(d), 1.0f));
-    if (w < 0.001) { return y; }
+    auto w = acosf(min(abs(d), 1.0f));
+    if (w < 0.001) { return vec4(y); }
     return (sinf((1 - t) * w) * (d < 0 ? -1 : 1) * x + sinf(t * w) * y) / sinf(w);
-}
-
-vec2 min(const vec2& u, const vec2& v) {
-    return vec2 {
-        std::min(u.x, v.x),
-        std::min(u.y, v.y)
-    };
-}
-vec3 min(const vec3& u, const vec3& v) {
-    return vec3 {
-        std::min(u.x, v.x),
-        std::min(u.y, v.y),
-        std::min(u.z, v.z)
-    };
-}
-vec4 min(const vec4& u, const vec4& v) {
-    return vec4 {
-        std::min(u.x, v.x),
-        std::min(u.y, v.y),
-        std::min(u.z, v.z),
-        std::min(u.w, v.w)
-    };
-}
-vec2 max(const vec2& u, const vec2& v) {
-    return vec2 {
-        std::max(u.x, v.x),
-        std::max(u.y, v.y)
-    };
-}
-vec3 max(const vec3& u, const vec3& v) {
-    return vec3 {
-        std::max(u.x, v.x),
-        std::max(u.y, v.y),
-        std::max(u.z, v.z)
-    };
-}
-vec4 max(const vec4& u, const vec4& v) {
-    return vec4 {
-        std::max(u.x, v.x),
-        std::max(u.y, v.y),
-        std::max(u.z, v.z),
-        std::max(u.w, v.w)
-    };
 }
 
 mat4 transpose(const mat4& m) {
