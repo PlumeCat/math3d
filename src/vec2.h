@@ -27,24 +27,24 @@ namespace jm {
     };
 
     template<typename X, typename Y> vec2(X, Y) -> vec2<X>; // CTAD guide for 2-argument constructor
-    template<typename T> concept IsVec2 = IsSpecializationOf<T, jm::vec2>;
+    template<typename T> concept IsVec2 = IsSpecializationOf<T, vec2>;
 
-    auto operator - (const IsVec2 auto& v) { return jm::vec2 { -v.x, -v.y }; }
-    auto operator + (const IsVec2 auto& v) { return jm::vec2 { +v.x, +v.y }; }
+    auto operator - (const IsVec2 auto& v) { return vec2 { -v.x, -v.y }; }
+    auto operator + (const IsVec2 auto& v) { return vec2 { +v.x, +v.y }; }
 
-    auto operator + (const IsVec2 auto& l, scalar auto s) { return jm::vec2 { l.x + s, l.y + s }; }
-    auto operator - (const IsVec2 auto& l, scalar auto s) { return jm::vec2 { l.x - s, l.y - s }; }
-    auto operator * (const IsVec2 auto& l, scalar auto s) { return jm::vec2 { l.x * s, l.y * s }; }
-    auto operator / (const IsVec2 auto& l, scalar auto s) { return jm::vec2 { l.x / s, l.y / s }; }
-    auto operator + (scalar auto s, const IsVec2 auto& l) { return jm::vec2 { s + l.x, s + l.y }; }
-    auto operator - (scalar auto s, const IsVec2 auto& l) { return jm::vec2 { s - l.x, s - l.y }; }
-    auto operator * (scalar auto s, const IsVec2 auto& l) { return jm::vec2 { s * l.x, s * l.y }; }
-    auto operator / (scalar auto s, const IsVec2 auto& l) { return jm::vec2 { s / l.x, s / l.y }; }
+    auto operator + (const IsVec2 auto& l, scalar auto s) { return vec2 { l.x + s, l.y + s }; }
+    auto operator - (const IsVec2 auto& l, scalar auto s) { return vec2 { l.x - s, l.y - s }; }
+    auto operator * (const IsVec2 auto& l, scalar auto s) { return vec2 { l.x * s, l.y * s }; }
+    auto operator / (const IsVec2 auto& l, scalar auto s) { return vec2 { l.x / s, l.y / s }; }
+    auto operator + (scalar auto s, const IsVec2 auto& l) { return vec2 { s + l.x, s + l.y }; }
+    auto operator - (scalar auto s, const IsVec2 auto& l) { return vec2 { s - l.x, s - l.y }; }
+    auto operator * (scalar auto s, const IsVec2 auto& l) { return vec2 { s * l.x, s * l.y }; }
+    auto operator / (scalar auto s, const IsVec2 auto& l) { return vec2 { s / l.x, s / l.y }; }
 
-    auto operator + (const IsVec2 auto& l, const IsVec2 auto& r) { return jm::vec2 { l.x + r.x, l.y + r.y }; }
-    auto operator - (const IsVec2 auto& l, const IsVec2 auto& r) { return jm::vec2 { l.x - r.x, l.y - r.y }; }
-    auto operator * (const IsVec2 auto& l, const IsVec2 auto& r) { return jm::vec2 { l.x * r.x, l.y * r.y }; }
-    auto operator / (const IsVec2 auto& l, const IsVec2 auto& r) { return jm::vec2 { l.x / r.x, l.y / r.y }; }
+    auto operator + (const IsVec2 auto& l, const IsVec2 auto& r) { return vec2 { l.x + r.x, l.y + r.y }; }
+    auto operator - (const IsVec2 auto& l, const IsVec2 auto& r) { return vec2 { l.x - r.x, l.y - r.y }; }
+    auto operator * (const IsVec2 auto& l, const IsVec2 auto& r) { return vec2 { l.x * r.x, l.y * r.y }; }
+    auto operator / (const IsVec2 auto& l, const IsVec2 auto& r) { return vec2 { l.x / r.x, l.y / r.y }; }
 
     auto operator == (const IsVec2 auto& l, const IsVec2 auto& r) { return l.x == r.x && l.y == r.y; }
 
@@ -52,4 +52,3 @@ namespace jm {
         return o << "vec2 { " << v.x << ", " << v.y << " }";
     }
 };
-

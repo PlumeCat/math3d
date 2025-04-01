@@ -3,7 +3,6 @@
 namespace jm {
     template<scalar Type>
     struct vec4 {
-
         Type x, y, z, w;
 
         vec4(): x(0), y(0), z(0), w(0) {}
@@ -37,7 +36,6 @@ namespace jm {
     auto operator - (const IsVec4 auto& l, scalar auto s) { return vec4 { l.x - s, l.y - s, l.z - s, l.w - s }; }
     auto operator * (const IsVec4 auto& l, scalar auto s) { return vec4 { l.x * s, l.y * s, l.z * s, l.w * s }; }
     auto operator / (const IsVec4 auto& l, scalar auto s) { return vec4 { l.x / s, l.y / s, l.z / s, l.w / s }; }
-
     auto operator + (scalar auto s, const IsVec4 auto& r) { return vec4 { s + r.x, s + r.y, s + r.z, s + r.w }; }
     auto operator - (scalar auto s, const IsVec4 auto& r) { return vec4 { s - r.x, s - r.y, s - r.z, s - r.w }; }
     auto operator * (scalar auto s, const IsVec4 auto& r) { return vec4 { s * r.x, s * r.y, s * r.z, s * r.w }; }

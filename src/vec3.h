@@ -3,7 +3,6 @@
 namespace jm {
     template<scalar Type>
     struct vec3 {
-
         Type x, y, z;
 
         vec3(): x(0), y(0), z(0) {}
@@ -48,23 +47,8 @@ namespace jm {
     auto operator / (const IsVec3 auto& l, const IsVec3 auto& r) { return vec3 { l.x / r.x, l.y / r.y, l.z / r.z }; }
 
     auto operator == (const IsVec3 auto& l, const IsVec3 auto& r) { return l.x == r.x && l.y == r.y && l.z == r.z; }
+
     std::ostream& operator << (std::ostream& o, const IsVec3 auto& v) {
         return o << "vec3 { " << v.x << ", " << v.y << ", " << v.z << " }";
     }
 };
-
-using vec3 = jm::vec3<float>;
-using ivec3 = jm::vec3<int32_t>;
-using uvec3 = jm::vec3<uint32_t>;
-
-#ifdef JMATH_IMPLEMENTATION
-// struct epsilon_comparator { Type x, y, z, epsilon; };
-// bool operator=(const epsilon_comparator& e) {
-//     return
-//         (abs(e.x - x) < e.epsilon) &&
-//         (abs(e.y - y) < e.epsilon) &&
-//         (abs(e.z - z) < e.epsilon);
-// }
-// jm::vec3<float>::epsilon_comparator operator~(const jm::vec3<float>& l) { return { l.x, l.y, l.z, epsilon_f }; }
-// jm::vec3<double>::epsilon_comparator operator~(const jm::vec3<double>& l) { return { l.x, l.y, l.z, epsilon_d }; }
-#endif

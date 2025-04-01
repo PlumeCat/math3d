@@ -57,3 +57,6 @@ struct alignas(16) mat4 {
         r3.x, r3.y, r3.z, r3.w,
     } {}
 };
+
+static_assert(sizeof(mat4) == 64);
+static_assert(alignof(mat4)== 16);

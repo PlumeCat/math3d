@@ -23,13 +23,27 @@ inline constexpr bool IsSpecializationOf = is_specialization_of<T,Z>::value;
 // #endif
 // using SIMD = __m128;
 
+
+#ifdef JMATH_IMPLEMENTATION
+// struct epsilon_comparator { Type x, y, z, epsilon; };
+// bool operator=(const epsilon_comparator& e) {
+//     return
+//         (abs(e.x - x) < e.epsilon) &&
+//         (abs(e.y - y) < e.epsilon) &&
+//         (abs(e.z - z) < e.epsilon);
+// }
+// jm::vec3<float>::epsilon_comparator operator~(const jm::vec3<float>& l) { return { l.x, l.y, l.z, epsilon_f }; }
+// jm::vec3<double>::epsilon_comparator operator~(const jm::vec3<double>& l) { return { l.x, l.y, l.z, epsilon_d }; }
+#endif
+
+
 static const float pi = 3.1415926535f;
 static const float degtorad = pi / 180.f;
 static const float radtodeg = 180.f / pi;
 
-template<std::floating_point T> T epsilon() { static_assert(false); };
-template<> float epsilon() { return 0.000001f; }
-template<> double epsilon() { return 0.0000000000000001; }
+template<std::floating_point T> T epsilon() {};
+template<> inline float epsilon() { return 0.000001f; }
+template<> inline double epsilon() { return 0.0000000000000001; }
 
 #include "vec2.h"
 #include "vec3.h"
@@ -55,12 +69,6 @@ float radians(float d);
 float saturate(float x);
 float clamp(float a, float b, float x);
 float step(float x, float edge);
-
-#include "vec2.h"
-#include "vec3.h"
-#include "vec4.h"
-#include "mat4.h"
-#include "perlin_noise.h"
 
 using jm::IsVec2;
 using jm::IsVec3;
