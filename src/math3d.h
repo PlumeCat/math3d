@@ -67,6 +67,7 @@ using uvec4 = jm::vec4<uint32_t>;
 float degrees(float r);
 float radians(float d);
 float saturate(float x);
+float sign(float x);
 float clamp(float a, float b, float x);
 float step(float x, float edge);
 
@@ -77,10 +78,6 @@ using jm::IsVec4;
 vec3 cross(const vec3& u, const vec3& v);
 vec3 reflect(const vec3& v, const vec3& n);
 vec3 refract(const vec3& v, const vec3& n, float i);
-
-vec2 sign(const vec2& v);
-vec3 sign(const vec3& v);
-vec4 sign(const vec4& v);
 
 vec2 normalize(const vec2& v);
 vec3 normalize(const vec3& v);
@@ -117,6 +114,7 @@ float length(const IsVec3 auto& v) { return sqrtf(length_sq(v)); }
 float length(const IsVec4 auto& v) { return sqrtf(length_sq(v)); }
 float length(const IsVec2 auto& v) { return sqrtf(length_sq(v)); }
 
+auto lerp(scalar auto a, scalar auto b, scalar auto t) { return a + (b - a) * t; }
 auto min(scalar auto a, scalar auto b) { return (a < b) ? a : b; }
 auto max(scalar auto a, scalar auto b) { return (a > b) ? a : b; }
 
@@ -241,6 +239,7 @@ per_component(ceil)
 per_component(round)
 per_component(degrees)
 per_component(radians)
+per_component(sign)
 
 per_component(trunc)
 
@@ -307,36 +306,16 @@ float radians(float d) {
 float saturate(float x) {
     return std::fmin(std::fmax(x, 0.f), 1.f);
 }
-float clamp(float a, float b, float x) {
+float clamp(float x, float a, float b) {
     return std::fmin(std::fmax(x, a), b);
 }
 float step(float edge, float x) {
     return (x < edge) ? 0.0 : 1.0;
 }
 
-
-vec2 sign(const vec2& v) {
-    return vec2 {
-        std::signbit(v.x) ? -1.f : 1.f,
-        std::signbit(v.y) ? -1.f : 1.f
-    };
+float sign(float x) {
+    return (x == 0.f) ? 0.f : (std::signbit(x) ? -1.f : 1.f);
 }
-vec3 sign(const vec3& v) {
-    return vec3 {
-        std::signbit(v.x) ? -1.f : 1.f,
-        std::signbit(v.y) ? -1.f : 1.f,
-        std::signbit(v.z) ? -1.f : 1.f
-    };
-}
-vec4 sign(const vec4& v) {
-    return vec4 {
-        std::signbit(v.x) ? -1.f : 1.f,
-        std::signbit(v.y) ? -1.f : 1.f,
-        std::signbit(v.z) ? -1.f : 1.f,
-        std::signbit(v.w) ? -1.f : 1.f
-    };
-}
-
 
 mat4 mat4::identity() {
     return mat4 {};
@@ -460,11 +439,11 @@ mat4 mat4::ortho(float x, float y, float w, float h, float zn, float zf) {
 }
 
 mat4 mat4::world(const vec3& fd, const vec3& up, const vec3& pos) {
-    const auto lt = cross(up, fd);
+    const auto lt = normalize(cross(up, fd));
     return mat4 {
-        lt.x,  up.x,  fd.x,  0,
-        lt.y,  up.y,  fd.y,  0,
-        lt.z,  up.z,  fd.z,  0,
+        lt.x,  lt.y,  lt.z,  0,
+        up.x,  up.y,  up.z,  0,
+        fd.x,  fd.y,  fd.z,  0,
         pos.x, pos.y, pos.z, 1
     };
 }
