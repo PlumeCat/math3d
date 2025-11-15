@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cmath>
+#include <cstdint>
 #include <iostream>
 #include <type_traits>
 
@@ -14,15 +15,6 @@ struct is_specialization_of<Z<Args...>, Z> : std::true_type {};
 
 template <typename T, template <typename...> class Z>
 inline constexpr bool IsSpecializationOf = is_specialization_of<T,Z>::value;
-
-// #ifndef JMATH_ENABLE_SSE2
-// #define JMATH_ENABLE_SSE2
-// #endif
-// #ifdef JMATH_ENABLE_SSE2
-// #include <xmmintrin.h>
-// #endif
-// using SIMD = __m128;
-
 
 #ifdef JMATH_IMPLEMENTATION
 // struct epsilon_comparator { Type x, y, z, epsilon; };
@@ -245,8 +237,8 @@ per_component(trunc)
 
 per_component_vv(step)
 
-per_component_vs_vv(fmod)
-per_component_vs_vv(pow)
+// per_component_vs_vv(fmod)
+// per_component_vs_vv(pow)
 
 per_component_vvv(clamp)
 
@@ -316,6 +308,8 @@ float step(float edge, float x) {
 float sign(float x) {
     return (x == 0.f) ? 0.f : (std::signbit(x) ? -1.f : 1.f);
 }
+
+
 
 mat4 mat4::identity() {
     return mat4 {};
@@ -508,6 +502,18 @@ vec4 slerp(const vec4& x, const vec4& y, const float t) {
     return (sinf((1 - t) * w) * (d < 0 ? -1 : 1) * x + sinf(t * w) * y) / sinf(w);
 }
 
+float determinant(const mat4& m) {
+    return
+    + m.m[0] * (+ (m.m[ 5] * m.m[10] * m.m[15] + m.m[ 6] * m.m[11] * m.m[13] + m.m[ 7] * m.m[ 9] * m.m[14])
+                - (m.m[ 7] * m.m[10] * m.m[13] + m.m[ 6] * m.m[ 9] * m.m[15] + m.m[ 5] * m.m[11] * m.m[14]))
+    - m.m[4] * (+ (m.m[ 1] * m.m[10] * m.m[15] + m.m[ 2] * m.m[11] * m.m[13] + m.m[ 3] * m.m[ 9] * m.m[14])
+                - (m.m[ 3] * m.m[10] * m.m[13] + m.m[ 2] * m.m[ 9] * m.m[15] + m.m[ 1] * m.m[11] * m.m[14]))
+    + m.m[8] * (+ (m.m[ 1] * m.m[ 6] * m.m[15] + m.m[ 2] * m.m[ 7] * m.m[13] + m.m[ 3] * m.m[ 5] * m.m[14])
+                - (m.m[ 3] * m.m[ 6] * m.m[13] + m.m[ 2] * m.m[ 5] * m.m[15] + m.m[ 1] * m.m[ 7] * m.m[14]))
+    - m.m[12]* (+ (m.m[ 1] * m.m[ 6] * m.m[11] + m.m[ 2] * m.m[ 7] * m.m[ 9] + m.m[ 3] * m.m[ 5] * m.m[10])
+                - (m.m[ 3] * m.m[ 6] * m.m[ 9] + m.m[ 2] * m.m[ 5] * m.m[11] + m.m[ 1] * m.m[ 7] * m.m[10]));
+}
+
 mat4 transpose(const mat4& m) {
     return {
         m.m[0], m.m[4], m.m[8], m.m[12],
@@ -518,29 +524,29 @@ mat4 transpose(const mat4& m) {
 }
 
 mat4 inverse(const mat4& m) {
-    float coef00 = m.m[10] * m.m[15] - m.m[14] * m.m[11];
-    float coef02 = m.m[6] * m.m[15] - m.m[14] * m.m[7];
-    float coef03 = m.m[6] * m.m[11] - m.m[10] * m.m[7];
+    auto coef00 = m.m[10] * m.m[15] - m.m[14] * m.m[11];
+    auto coef02 = m.m[6]  * m.m[15] - m.m[14] * m.m[7];
+    auto coef03 = m.m[6]  * m.m[11] - m.m[10] * m.m[7];
 
-    float coef04 = m.m[9] * m.m[15] - m.m[13] * m.m[11];
-    float coef06 = m.m[5] * m.m[15] - m.m[13] * m.m[7];
-    float coef07 = m.m[5] * m.m[11] - m.m[9] * m.m[7];
+    auto coef04 = m.m[9]  * m.m[15] - m.m[13] * m.m[11];
+    auto coef06 = m.m[5]  * m.m[15] - m.m[13] * m.m[7];
+    auto coef07 = m.m[5]  * m.m[11] - m.m[9]  * m.m[7];
 
-    float coef08 = m.m[9] * m.m[14] - m.m[13] * m.m[10];
-    float coef10 = m.m[5] * m.m[14] - m.m[13] * m.m[6];
-    float coef11 = m.m[5] * m.m[10] - m.m[9] * m.m[6];
+    auto coef08 = m.m[9]  * m.m[14] - m.m[13] * m.m[10];
+    auto coef10 = m.m[5]  * m.m[14] - m.m[13] * m.m[6];
+    auto coef11 = m.m[5]  * m.m[10] - m.m[9]  * m.m[6];
 
-    float coef12 = m.m[8] * m.m[15] - m.m[12] * m.m[11];
-    float coef14 = m.m[4] * m.m[15] - m.m[12] * m.m[7];
-    float coef15 = m.m[4] * m.m[11] - m.m[8] * m.m[7];
+    auto coef12 = m.m[8]  * m.m[15] - m.m[12] * m.m[11];
+    auto coef14 = m.m[4]  * m.m[15] - m.m[12] * m.m[7];
+    auto coef15 = m.m[4]  * m.m[11] - m.m[8]  * m.m[7];
 
-    float coef16 = m.m[8] * m.m[14] - m.m[12] * m.m[10];
-    float coef18 = m.m[4] * m.m[14] - m.m[12] * m.m[6];
-    float coef19 = m.m[4] * m.m[10] - m.m[8] * m.m[6];
+    auto coef16 = m.m[8]  * m.m[14] - m.m[12] * m.m[10];
+    auto coef18 = m.m[4]  * m.m[14] - m.m[12] * m.m[6];
+    auto coef19 = m.m[4]  * m.m[10] - m.m[8]  * m.m[6];
 
-    float coef20 = m.m[8] * m.m[13] - m.m[12] * m.m[9];
-    float coef22 = m.m[4] * m.m[13] - m.m[12] * m.m[5];
-    float coef23 = m.m[4] * m.m[9] -  m.m[8] *  m.m[5];
+    auto coef20 = m.m[8]  * m.m[13] - m.m[12] * m.m[9];
+    auto coef22 = m.m[4]  * m.m[13] - m.m[12] * m.m[5];
+    auto coef23 = m.m[4]  * m.m[9] -  m.m[8]  * m.m[5];
 
     auto fac0 = vec4(coef00, coef00, coef02, coef03);
     auto fac1 = vec4(coef04, coef04, coef06, coef07);
@@ -570,10 +576,9 @@ mat4 inverse(const mat4& m) {
 
     auto row0 = vec4(inverse.m[0], inverse.m[4], inverse.m[8], inverse.m[12]);
     auto dot0 = vec4(m.m[0], m.m[1], m.m[2], m.m[3]) * row0;
-    float dot1 = dot0.x + dot0.y + dot0.z + dot0.w;
-    float oneoverdeterminant = dot1;
-
-    return inverse * oneoverdeterminant;
+    auto dot1 = dot0.x + dot0.y + dot0.z + dot0.w;
+    auto recip_det = dot1;
+    return inverse * recip_det;
 }
 
 vec2 mul(const vec2& v, const mat4& m) {

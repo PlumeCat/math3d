@@ -5,12 +5,12 @@ namespace jm {
     struct vec4 {
         Type x, y, z, w;
 
-        vec4(): x(0), y(0), z(0), w(0) {}
-        vec4(scalar auto t): x(t), y(t), z(t), w(t) {}
-        vec4(scalar auto x, scalar auto y, scalar auto z, scalar auto w): x(x), y(y), z(z), w(w) {}
-        vec4(const vec4& other): x(other.x), y(other.y), z(other.z), w(other.w) {}
-        template<typename U> explicit vec4(const vec4<U>& other): x(other.x), y(other.y), z(other.z), w(other.w) {}
-        vec4(vec4&&) = default;
+        constexpr vec4(): x(0), y(0), z(0), w(0) {}
+        constexpr vec4(scalar auto t): x(t), y(t), z(t), w(t) {}
+        constexpr vec4(scalar auto x, scalar auto y, scalar auto z, scalar auto w): x(x), y(y), z(z), w(w) {}
+        constexpr vec4(const vec4& other): x(other.x), y(other.y), z(other.z), w(other.w) {}
+        template<typename U> constexpr explicit vec4(const vec4<U>& other): x(other.x), y(other.y), z(other.z), w(other.w) {}
+        constexpr vec4(vec4&&) = default;
         vec4& operator=(const vec4& other) { x = other.x; y = other.y; z = other.z; w = other.w; return *this; }
         vec4& operator=(vec4&&) = default;
 

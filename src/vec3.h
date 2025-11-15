@@ -5,12 +5,12 @@ namespace jm {
     struct vec3 {
         Type x, y, z;
 
-        vec3(): x(0), y(0), z(0) {}
-        vec3(scalar auto t): x(t), y(t), z(t) {}
-        vec3(scalar auto x, scalar auto y, scalar auto z): x(x), y(y), z(z) {}
-        vec3(const vec3& other): x(other.x), y(other.y), z(other.z) {}
-        template<typename U> explicit vec3(const vec3<U>& other): x(other.x), y(other.y), z(other.z) {}
-        vec3(vec3&&) = default;
+        constexpr vec3(): x(0), y(0), z(0) {}
+        constexpr vec3(scalar auto t): x(t), y(t), z(t) {}
+        constexpr vec3(scalar auto x, scalar auto y, scalar auto z): x(x), y(y), z(z) {}
+        constexpr vec3(const vec3& other): x(other.x), y(other.y), z(other.z) {}
+        template<typename U> constexpr explicit vec3(const vec3<U>& other): x(other.x), y(other.y), z(other.z) {}
+        constexpr vec3(vec3&&) = default;
         vec3& operator=(const vec3& other) { x = other.x; y = other.y; z = other.z; return *this; }
         vec3& operator=(vec3&&) = default;
 

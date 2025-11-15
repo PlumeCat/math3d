@@ -4,26 +4,27 @@
 // #include <jlib/log.h>
 
 #define ENABLE_TEST
+#define JLIB_TEST_IMPLEMENTATION
+#define JLIB_IMPLEMENTATION
 #include <jlib/test_framework.h>
-#include <iostream>
 
 
 TEST("determinant") {
-    // ASSERT(determinant(mat4 {
-    //     {2,0,0,0},
-    //     {0,1,0,0},
-    //     {0,0,1,0},
-    //     {0,0,0,1}
-    // }) == 2);
+    ASSERT(determinant(mat4 {
+        {2,0,0,0},
+        {0,1,0,0},
+        {0,0,1,0},
+        {0,0,0,1}
+    }) == 2);
 }
-// TEST("determinant 2") {
-//     ASSERT(determinant(mat4{{
-//         { 5, -7, 2, 2 },
-//         { 0, 3, 0, -4 },
-//         { -5, -8, 0, 3 },
-//         { 0, 5, 0, -6 }
-//     }}) == 20);
-// }
+TEST("determinant 2") {
+    ASSERT(determinant(mat4{
+        {  5, -7, 2,  2 },
+        {  0,  3, 0, -4 },
+        { -5, -8, 0,  3 },
+        {  0,  5, 0, -6 }
+    }) == 20);
+}
 
 TEST("vec2 mul mat4") {
     ASSERT(mul(vec2(5, 10), mat4::scale(2)) == vec2(10, 20));
@@ -46,9 +47,9 @@ TEST("vec3 mul_norm") {
 
 
 TEST("disabled negation for uvec") {
-    // auto test1 = uvec3(1, 2, 3);
-    // auto test2 = uvec3(5, 6, 7);
-    // auto test3 = test2 - test1;
+    auto test1 = uvec3(1, 2, 3);
+    auto test2 = uvec3(5, 6, 7);
+    auto test3 = test2 - test1;
 }
 
 TEST("inverse scale") {
@@ -60,9 +61,9 @@ TEST("inverse scale") {
 
     auto testvec = vec3 { 6, 135, 3465 };
     testvec -= mul(testvec, inv * scale);
-    ASSERT(abs(testvec.x) < 0.0001);
-    ASSERT(abs(testvec.y) < 0.0001);
-    ASSERT(abs(testvec.z) < 0.0001);
+    ASSERT(std::abs(testvec.x) < 0.0001);
+    ASSERT(std::abs(testvec.y) < 0.0001);
+    ASSERT(std::abs(testvec.z) < 0.0001);
 }
 
 TEST("inverse view") {
@@ -73,9 +74,9 @@ TEST("inverse view") {
     auto testvec = vec3 { 1, 3, 2 };
     testvec -= mul(testvec, ident_hopefully);
 
-    ASSERT(abs(testvec.x) < 0.0001);
-    ASSERT(abs(testvec.y) < 0.0001);
-    ASSERT(abs(testvec.z) < 0.0001);
+    ASSERT(std::abs(testvec.x) < 0.0001);
+    ASSERT(std::abs(testvec.y) < 0.0001);
+    ASSERT(std::abs(testvec.z) < 0.0001);
 }
 
 TEST("inverse proj") {
@@ -85,13 +86,19 @@ TEST("inverse proj") {
     auto testvec = vec3 { 183, 34, -125 };
     testvec -= mul(testvec, ident);
 
-    ASSERT(abs(testvec.x) < 0.0001);
-    ASSERT(abs(testvec.y) < 0.0001);
-    ASSERT(abs(testvec.z) < 0.0001);
+    ASSERT(std::abs(testvec.x) < 0.0001);
+    ASSERT(std::abs(testvec.y) < 0.0001);
+    ASSERT(std::abs(testvec.z) < 0.0001);
 }
 
-IMPLEMENT_TESTS()
+TEST("lots of operations") {
+    // construct (scalar, other vec, )
+    for (auto i = 0; i < 10'000; i++) {
+    }
+}
+
 int main(int argc, char* argv[]) {
-    RUN_TESTS()
+    run_tests({});
+    return 0;
 }
 

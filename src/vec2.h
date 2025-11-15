@@ -5,12 +5,12 @@ namespace jm {
     struct vec2 {
         Type x, y;
 
-        vec2(): x(0), y(0) {}
-        vec2(scalar auto t): x(t), y(t) {}
-        vec2(scalar auto x, scalar auto y): x(x), y(y) {}
-        vec2(const vec2& other): x(other.x), y(other.y) {}
-        template<typename U> explicit vec2(const vec2<U>& other): x(other.x), y(other.y) {}
-        vec2(vec2&&) = default;
+        constexpr vec2(): x(0), y(0) {}
+        constexpr vec2(scalar auto t): x(t), y(t) {}
+        constexpr vec2(scalar auto x, scalar auto y): x(x), y(y) {}
+        constexpr vec2(const vec2& other): x(other.x), y(other.y) {}
+        template<typename U> constexpr explicit vec2(const vec2<U>& other): x(other.x), y(other.y) {}
+        constexpr vec2(vec2&&) = default;
         vec2& operator=(const vec2& other) { x = other.x; y = other.y; return *this; }
         vec2& operator=(vec2&&) = default;
 
